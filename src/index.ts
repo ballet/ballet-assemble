@@ -20,25 +20,25 @@ import {
 
 
 /**
- * A notebook widget extension that adds a button to the toolbar.
+ * A notebook widget extension that adds a submit button to the toolbar.
  */
 export
-class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
     let callback = () => {
-      NotebookActions.runAll(panel.content, context.session);
+      NotebookActions.run(panel.content, context.session);
     };
     let button = new ToolbarButton({
-      className: 'myButton',
-      iconClassName: 'fa fa-fast-forward',
+      className: 'balletSubmitButton',
+      iconClassName: 'fa fa-share',
       onClick: callback,
-      tooltip: 'Run All'
+      tooltip: 'Submit Ballet Module'
     });
 
-    panel.toolbar.insertItem(0, 'runAll', button);
+    panel.toolbar.addItem('balletSubmitButton', button);
     return new DisposableDelegate(() => {
       button.dispose();
     });
@@ -54,7 +54,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension ballet-submit is activated!');
-    app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
+    app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension());
   }
 };
 
