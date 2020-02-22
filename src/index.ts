@@ -15,7 +15,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  NotebookActions, NotebookPanel, INotebookModel
+  NotebookPanel, INotebookModel
 } from '@jupyterlab/notebook';
 
 
@@ -29,7 +29,11 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
     let callback = () => {
-      NotebookActions.run(panel.content, context.session);
+      // load current cell
+      let notebook = panel.content;
+      let activeCell = notebook.activeCell;
+      let contents = activeCell.model.value.text;
+      console.log(contents);
     };
     let button = new ToolbarButton({
       className: 'balletSubmitButton',
