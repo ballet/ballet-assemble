@@ -1,6 +1,6 @@
-# ballet-submit
+# ballet-submit-labextension
 
-![Github Actions Status](https://github.com/HDI-Project/ballet-submit-jupyterlab/workflows/Build/badge.svg)
+![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Build/badge.svg)
 
 Submit ballet modules from within JupyterLab
 
@@ -12,7 +12,7 @@ Submit ballet modules from within JupyterLab
 ## Install
 
 ```bash
-jupyter labextension install ballet-submit
+jupyter labextension install ballet-submit-labextension
 ```
 
 ## Contributing
@@ -25,7 +25,7 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Move to ballet-submit directory
+# Move to ballet-submit-labextension directory
 # Install dependencies
 jlpm
 # Build Typescript source
@@ -50,6 +50,6 @@ jupyter lab --watch
 ### Uninstall
 
 ```bash
-jupyter labextension uninstall ballet-submit
+jupyter labextension uninstall ballet-submit-labextension
 ```
 
