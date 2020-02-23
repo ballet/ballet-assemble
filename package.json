@@ -1,5 +1,5 @@
 {
-  "name": "ballet-submit",
+  "name": "ballet-submit-labextension",
   "version": "0.1.0",
   "description": "Submit ballet modules from within JupyterLab",
   "keywords": [
@@ -7,9 +7,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/HDI-Project/ballet-submit-jupyterlab",
+  "homepage": "https://github.com/HDI-Project/ballet-submit-labextension",
   "bugs": {
-    "url": "https://github.com/HDI-Project/ballet-submit-jupyterlab/issues"
+    "url": "https://github.com/HDI-Project/ballet-submit-labextension/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Micah Smith",
@@ -22,7 +22,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HDI-Project/ballet-submit-jupyterlab.git"
+    "url": "https://github.com/HDI-Project/ballet-submit-labextension.git"
   },
   "scripts": {
     "build": "tsc",
@@ -35,7 +35,8 @@
     "@jupyterlab/apputils": "^1.2.1",
     "@jupyterlab/docregistry": "^1.2.1",
     "@jupyterlab/notebook": "^1.2.2",
-    "@phosphor/disposable": "^1.3.1"
+    "@phosphor/disposable": "^1.3.1",
+    "axios": "^0.19.2"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
