@@ -1,4 +1,8 @@
 import {
+  Dialog, showDialog, showErrorMessage, ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
   IDisposable, DisposableDelegate
 } from '@phosphor/disposable';
 
@@ -7,15 +11,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ToolbarButton
-} from '@jupyterlab/apputils';
-
-import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
-  NotebookActions, NotebookPanel, Notebook, INotebookModel
+  NotebookPanel, INotebookModel
 } from '@jupyterlab/notebook';
 
 import axios from 'axios';
@@ -35,21 +35,6 @@ async function postModule(cellContents: string): Promise<string> {
   }
 }
 
-function recordSubmitted(notebook: Notebook, index: number, url: string): void {
-  notebook.activeCellIndex = index;
-  NotebookActions.insertBelow(notebook);
-  NotebookActions.changeCellType(notebook, 'raw');
-  let cell = notebook.activeCell;
-
-  let text: string;
-  if (url === undefined) {
-    text = `Oops - there was a problem submitting your feature.`;
-  } else {
-    text = `Your feature was submitted! The associated pull request is visible at ${url}. Please do not submit this same feature more than once.`;
-  }
-  cell.model.value.text = text;
-}
-
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
  */
@@ -64,15 +49,39 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       // load current cell
       let notebook = panel.content;
       let activeCell = notebook.activeCell;
-      let activeCellIndex = notebook.activeCellIndex;
       let contents = activeCell.model.value.text;
+
+      // confirm to proceed
+      const result = await showDialog({
+        title: 'Submit feature?',
+        body: `
+          The following feature would be submitted to the upstream Ballet project:
+          \n
+          \n
+          ${contents}
+        `
+      });
+      if (! result.button.accept) {
+        return;
+      }
 
       // post contents to ballet-submit-server
       console.log(contents);
       const url = await postModule(contents);
 
       // try to add a message to cell outputs
-      recordSubmitted(notebook, activeCellIndex, url);
+      if (url !== undefined) {
+        showDialog({
+          title: 'Feature submitted successfully',
+          body: `Your feature was submitted! The associated pull request is visible at ${url}. Please do not submit this same feature more than once.`,
+          buttons: [
+            Dialog.okButton()
+          ]
+        });
+      } else {
+        showErrorMessage('Feature submitted successfully', `Oops - there was a problem submitting your feature.`
+        );
+      }
     };
 
     let button = new ToolbarButton({
@@ -98,7 +107,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: 'ballet-submit',
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension ballet-submit is activated!');
+    console.log('JupyterLab extension ballet-submit-labextension is activated!');
     app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension());
   }
 };
