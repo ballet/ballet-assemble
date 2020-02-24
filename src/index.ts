@@ -59,6 +59,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
    * Create a new extension object.
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+
     let callback = async () => {
       // load current cell
       let notebook = panel.content;
@@ -73,14 +74,16 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       // try to add a message to cell outputs
       recordSubmitted(notebook, activeCellIndex, url);
     };
+
     let button = new ToolbarButton({
-      className: 'balletSubmitButton',
-      iconClassName: 'fa fa-share',
+      label: 'Submit',
+      iconClassName: 'fa fa-share balletSubmitButtonIcon',
       onClick: callback,
-      tooltip: 'Submit Ballet Module'
+      tooltip: 'Submit current cell to Ballet project'
     });
 
     panel.toolbar.addItem('balletSubmitButton', button);
+
     return new DisposableDelegate(() => {
       button.dispose();
     });
