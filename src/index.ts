@@ -31,6 +31,7 @@ async function postModule(cellContents: string): Promise<string> {
     return response.data
   } catch (error) {
     console.log(error);
+    return undefined
   }
 }
 
@@ -39,7 +40,14 @@ function recordSubmitted(notebook: Notebook, index: number, url: string): void {
   NotebookActions.insertBelow(notebook);
   NotebookActions.changeCellType(notebook, 'raw');
   let cell = notebook.activeCell;
-  cell.model.value.text = `Your feature was submitted! The associated pull request is visible at ${url}. Please do not submit this same feature more than once.`;
+
+  let text: string;
+  if (url === undefined) {
+    text = `Oops - there was a problem submitting your feature.`;
+  } else {
+    text = `Your feature was submitted! The associated pull request is visible at ${url}. Please do not submit this same feature more than once.`;
+  }
+  cell.model.value.text = text;
 }
 
 /**
