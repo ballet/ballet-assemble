@@ -1,6 +1,6 @@
 {
   "name": "ballet-submit-labextension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Submit ballet modules from within JupyterLab",
   "keywords": [
     "jupyter",
