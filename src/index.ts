@@ -23,7 +23,13 @@ import axios from 'axios';
 
 const SUBMIT_URL = 'https://ballet-submit-server.herokuapp.com/submit'
 
-async function postModule(cellContents: string): Promise<string> {
+interface ISubmissionResponse {
+  result: boolean;
+  url?: string;
+  message?: string;
+}
+
+async function postModule(cellContents: string): Promise<ISubmissionResponse> {
   try {
     const response = await axios.post(SUBMIT_URL, {
       codeContent: cellContents,
@@ -31,7 +37,7 @@ async function postModule(cellContents: string): Promise<string> {
     return response.data
   } catch (error) {
     console.log(error);
-    return undefined
+    return { result: false }
   }
 }
 
@@ -52,7 +58,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       let contents = activeCell.model.value.text;
 
       // confirm to proceed
-      const result = await showDialog({
+      const confirmDialog = await showDialog({
         title: 'Submit feature?',
         body: `
           The following feature would be submitted to the upstream Ballet project:
@@ -61,25 +67,28 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
           ${contents}
         `
       });
-      if (! result.button.accept) {
+      if (! confirmDialog.button.accept) {
         return;
       }
 
       // post contents to ballet-submit-server
       console.log(contents);
-      const url = await postModule(contents);
+      const result = await postModule(contents);
 
       // try to add a message to cell outputs
-      if (url !== undefined) {
+      if (result.result) {
         showDialog({
           title: 'Feature submitted successfully',
-          body: `Your feature was submitted! The associated pull request is visible at ${url}. Please do not submit this same feature more than once.`,
+          body: `Your feature was submitted! The associated pull request is visible at ${result.url}. Please do not submit this same feature more than once.`,
           buttons: [
             Dialog.okButton()
           ]
         });
       } else {
-        showErrorMessage('Feature submitted successfully', `Oops - there was a problem submitting your feature.`
+        const message = result.message !== undefined && result.message !== null
+          ? `: ${result.message}.`
+          : '.';
+        showErrorMessage('Error submitting feature', `Oops - there was a problem submitting your feature${message}`
         );
       }
     };
@@ -101,10 +110,10 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 
 
 /**
- * Initialization data for the ballet-submit extension.
+ * Initialization data for the ballet-submit-labextension extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-  id: 'ballet-submit',
+  id: 'ballet-submit-labextension',
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension ballet-submit-labextension is activated!');
