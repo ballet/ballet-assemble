@@ -19,6 +19,9 @@ import {
 } from '@jupyterlab/notebook';
 
 import axios from 'axios';
+import {
+  ConfirmWidget
+} from './widgets';
 
 
 const SUBMIT_URL = 'https://ballet-submit-server.herokuapp.com/submit'
@@ -58,14 +61,10 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       let contents = activeCell.model.value.text;
 
       // confirm to proceed
+      let widget = new ConfirmWidget(contents);
       const confirmDialog = await showDialog({
         title: 'Submit feature?',
-        body: `
-          The following feature would be submitted to the upstream Ballet project:
-          \n
-          \n
-          ${contents}
-        `
+        body: widget
       });
       if (! confirmDialog.button.accept) {
         return;
