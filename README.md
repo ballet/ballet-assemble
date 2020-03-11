@@ -7,7 +7,7 @@ Submit ballet modules from within JupyterLab
 
 ## Requirements
 
-* JupyterLab >= 1.0
+* JupyterLab >= 2.0
 
 ## Install
 
@@ -52,4 +52,3 @@ jupyter lab --watch
 ```bash
 jupyter labextension uninstall ballet-submit-labextension
 ```
-
