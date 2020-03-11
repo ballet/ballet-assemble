@@ -1,6 +1,7 @@
 # ballet-submit-labextension
 
 ![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Build/badge.svg)
+![npm version](https://img.shields.io/npm/v/ballet-submit-labextension)
 
 Submit ballet modules from within JupyterLab
 
