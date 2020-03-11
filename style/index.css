@@ -1,3 +1,15 @@
-.balletSubmitButtonIcon {
+/* yellow arrow part of submit button */
+.ballet-submitButtonIcon {
   color: #FCDD35;
+}
+
+/* url to github pull request */
+.ballet-featureSubmittedOkay a:link {
+  text-decoration: underline;
+  color: #1976D2;
+}
+
+/* code block in submit feature? dialog */
+.ballet-featureSubmittedConfirm pre {
+  background-color: rgb(239, 240, 241);
 }
