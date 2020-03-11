@@ -4,7 +4,7 @@ import {
 
 import {
   IDisposable, DisposableDelegate
-} from '@phosphor/disposable';
+} from '@lumino/disposable';
 
 import {
   JupyterFrontEnd, JupyterFrontEndPlugin
@@ -18,11 +18,15 @@ import {
   NotebookPanel, INotebookModel
 } from '@jupyterlab/notebook';
 
+import {
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+
 import axios from 'axios';
+
 import {
   ConfirmWidget, FeatureSubmittedOkayWidget
 } from './widgets';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 
 interface ISubmissionResponse {
@@ -110,7 +114,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 
     let button = new ToolbarButton({
       label: 'Submit',
-      iconClassName: 'fa fa-share ballet-submitButtonIcon',
+      iconClass: 'fa fa-share ballet-submitButtonIcon',
       onClick: callback,
       tooltip: 'Submit current cell to Ballet project'
     });
