@@ -1,0 +1,15 @@
+{
+  "title": "Ballet Submit",
+  "description": "Ballet Submit settings.",
+  "jupyter.lab.setting-icon": "",
+  "jupyter.lab.setting-icon-label": "Ballet Submit Settings",
+  "properties": {
+    "submitUrl": {
+      "title": "Submit URL",
+      "description": "Endpoint to submit to a submission server",
+      "type": "string",
+      "default": "https://ballet-submit-server.herokuapp.com/submit"
+    }
+  },
+  "type": "object"
+}
