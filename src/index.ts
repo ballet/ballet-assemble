@@ -1,5 +1,5 @@
 import {
-  Dialog, showDialog, showErrorMessage, ToolbarButton
+  Dialog, showDialog, showErrorMessage, ToolbarButton, ICommandPalette
 } from '@jupyterlab/apputils';
 
 import {
@@ -108,6 +108,24 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
   }
 }
 
+function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
+  console.log('JupyterLab extension ballet-submit-labextension is activated!');
+
+  // add button to toolbar
+  app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension());
+
+  // create command
+  const command: string = 'ballet:submit';
+  app.commands.addCommand(command, {
+    label: 'Submit Feature',
+    execute: () => {
+      console.log('Submit feature executed (TODO)');
+    }
+  });
+
+  // add command to palette
+  palette.addItem({command, category: 'Ballet'});
+}
 
 /**
  * Initialization data for the ballet-submit-labextension extension.
@@ -115,10 +133,8 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'ballet-submit-labextension',
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension ballet-submit-labextension is activated!');
-    app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension());
-  }
+  requires: [ICommandPalette],
+  activate: activate
 };
 
 export default extension;
