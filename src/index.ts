@@ -20,7 +20,7 @@ import {
 
 import axios from 'axios';
 import {
-  ConfirmWidget
+  ConfirmWidget, FeatureSubmittedOkayWidget
 } from './widgets';
 
 
@@ -61,10 +61,9 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       let contents = activeCell.model.value.text;
 
       // confirm to proceed
-      let widget = new ConfirmWidget(contents);
       const confirmDialog = await showDialog({
         title: 'Submit feature?',
-        body: widget
+        body: new ConfirmWidget(contents)
       });
       if (! confirmDialog.button.accept) {
         return;
@@ -78,7 +77,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       if (result.result) {
         showDialog({
           title: 'Feature submitted successfully',
-          body: `Your feature was submitted! The associated pull request is visible at ${result.url}. Please do not submit this same feature more than once.`,
+          body: new FeatureSubmittedOkayWidget(result.url),
           buttons: [
             Dialog.okButton()
           ]
@@ -87,14 +86,16 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
         const message = result.message !== undefined && result.message !== null
           ? `: ${result.message}.`
           : '.';
-        showErrorMessage('Error submitting feature', `Oops - there was a problem submitting your feature${message}`
+        showErrorMessage(
+          'Error submitting feature',
+          `Oops - there was a problem submitting your feature${message}`
         );
       }
     };
 
     let button = new ToolbarButton({
       label: 'Submit',
-      iconClassName: 'fa fa-share balletSubmitButtonIcon',
+      iconClassName: 'fa fa-share ballet-submitButtonIcon',
       onClick: callback,
       tooltip: 'Submit current cell to Ballet project'
     });
