@@ -92,6 +92,7 @@ setup_args = dict(
     packages=find_packages(where='server',
                            include=['ballet_submit_labextension',
                                     'ballet_submit_labextension.*']),
+    package_dir={'': 'server'},
     install_requires=install_requires,
     extras_require={
         'test': test_requirements,
