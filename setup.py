@@ -52,7 +52,32 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "jupyterlab >= 2.0",
+    "jupyterlab>=2.0",
+    "black==19.10b0",
+    "ballet",
+    "funcy",
+    "pygithub",
+    "stacklog",
+]
+
+test_requirements = [
+    'coverage>=4.5.1',
+    'pytest>=3.4.2',
+    'pytest-cov>=2.6',
+]
+
+development_requirements = [
+    # general
+    'bumpversion>=0.5.3',
+    'pip>=9.0.1',
+
+    # style check
+    'flake8>=3.5.0',
+    'isort>=4.3.4,<=4.3.9',
+
+    # distribute on PyPI
+    'twine>=1.10.0',
+    'wheel>=0.30.0',
 ]
 
 setup_args = dict(
@@ -68,6 +93,10 @@ setup_args = dict(
                                       include=['ballet_submit_labextension',
                                                'ballet_submit_labextension.*']),
     install_requires=install_requires,
+    extras_require={
+        'test': test_requirements,
+        'dev': development_requirements + test_requirements,
+    },
     zip_safe=False,
     include_package_data=True,
     license="MIT",

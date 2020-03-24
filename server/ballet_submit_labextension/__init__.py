@@ -4,13 +4,13 @@
 
 __author__ = 'Micah Smith'
 __email__ = 'micahs@mit.edu'
-__version__ = '0.2.0'
+__version__ = '0.4.0'
 
 
 from .handlers import setup_handlers
 
 
-EXTENSION_URL_PATH = 'ballet-submit'
+EXTENSION_URL_PATH = 'ballet'
 
 
 def load_jupyter_server_extension(app):
@@ -21,5 +21,5 @@ def load_jupyter_server_extension(app):
             Notebook application instance
     """
     setup_handlers(app, EXTENSION_URL_PATH)
-    app.log.info('Registered ballet_submit_serverextension extension at URL path /%s',
+    app.log.info('Registered ballet_submit_labextension extension at URL path /%s',
                  EXTENSION_URL_PATH)
