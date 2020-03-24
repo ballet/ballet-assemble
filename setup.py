@@ -80,7 +80,7 @@ development_requirements = [
     'wheel>=0.30.0',
 ]
 
-setup(
+setup_args = dict(
     name='ballet-submit-labextension',
     version='0.4.0',
     url='https://github.com/HDI-Project/ballet-submit-labextension',
@@ -112,3 +112,6 @@ setup(
         'Framework :: Jupyter',
     ],
 )
+
+if __name__ == '__main__':
+    setup(**setup_args)
