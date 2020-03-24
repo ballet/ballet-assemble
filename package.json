@@ -26,8 +26,14 @@
     "url": "https://github.com/HDI-Project/ballet-submit-labextension.git"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "jlpm run build:lib",
+    "build:labextension": "cd server/ballet-submit-labextension && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../../..",
+    "build:lib": "tsc",
+    "build:all": "jlpm run build:labextension",
+    "clean": "jlpm run clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf ballet-submit-labextension/labextension",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "prepare": "jlpm run clean && jlpm run build",
     "watch": "tsc -w"
   },
@@ -50,6 +56,16 @@
     "style/*.css"
   ],
   "jupyterlab": {
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "ballet-submit-labextension"
+        }
+      }
+    },
     "extension": true,
     "schemaDir": "schema"
   }
