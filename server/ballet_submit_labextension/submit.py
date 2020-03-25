@@ -1,9 +1,11 @@
+import logging
 import pathlib
 import tempfile
 import uuid
 from dataclasses import asdict, dataclass
 from os import getenv
 from textwrap import dedent
+from typing import List, Tuple
 
 import ballet.templating
 import funcy as fy
@@ -26,8 +28,8 @@ UPSTREAM_REPO_SPEC = f'HDI-Project/{REPO_NAME}'
 @dataclass
 class Response:
     result: str
-    url: str
-    message: str
+    url: str = None
+    message: str = None
 
 
 def make_feature_and_branch_name():
@@ -39,7 +41,7 @@ def make_feature_and_branch_name():
     return feature_name, branch_name
 
 
-def get_new_feature_path(changes):
+def get_new_feature_path(changes: List[Tuple[str, str]]):
     cwd = pathlib.Path.cwd()
     for (name, kind) in changes:
         if kind == 'file' and '__init__' not in str(name):
@@ -52,12 +54,12 @@ def is_debug():
     return truthy(getenv('DEBUG', default='false'))
 
 
-def fail(message):
-    return Response(result=False, url=None, message=message)
+def fail(message: str):
+    return Response(result=False, message=message)
 
 
 @fy.post_processing(asdict)
-def create_pull_request_for_code_content(input_data, logger):
+def create_pull_request_for_code_content(input_data: dict, logger: logging.Logger):
     with stacklog(logger.debug, 'Loading codeContent param'):
         if 'codeContent' in input_data:
             code_content = input_data['codeContent']
@@ -66,11 +68,7 @@ def create_pull_request_for_code_content(input_data, logger):
 
     with stacklog(logger.info, 'Checking for valid code'):
         if not is_valid_python(code_content):
-            return {
-                'result': False,
-                'url': None,
-                'message': 'Submitted code is not valid Python code',
-            }
+            return fail('Submitted code is not valid Python code')
 
     with tempfile.TemporaryDirectory() as dirname:
         dirname = str(pathlib.Path(dirname).resolve())
@@ -144,15 +142,8 @@ def create_pull_request_for_code_content(input_data, logger):
                 if not is_debug():
                     pr = grepo.create_pull(title=title, body=body, base=base, head=head,
                                            maintainer_can_modify=maintainer_can_modify)
-                    return {
-                        'result': True,
-                        'url': pr.html_url,
-                        'message': None,
-                    }
+                    url = pr.html_url
+                else:
+                    url = 'http://some/testing/url'
 
-            if is_debug():
-                return {
-                    'result': True,
-                    'url': 'http://some/testing/url',
-                    'message': None,
-                }
+                return Response(result=True, url=url)

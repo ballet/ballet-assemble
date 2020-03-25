@@ -1,6 +1,7 @@
 from functools import partial
 
 import tornado
+from jupyterlab.labapp import LabApp
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -23,9 +24,9 @@ class SubmitHandler(APIHandler):
         self.write(result)
 
 
-def setup_handlers(app, url_path):
-    host_pattern = '.*$'  # is this needed?
-    base_url = app.settings['base_url']
+def setup_handlers(app: LabApp, url_path: str):
+    host_pattern = '.*$'
+    base_url = app.base_url
     route_pattern = partial(url_path_join, base_url, url_path)
 
     app.add_handlers(host_pattern, [

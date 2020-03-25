@@ -6,6 +6,7 @@ __author__ = 'Micah Smith'
 __email__ = 'micahs@mit.edu'
 __version__ = '0.4.0'
 
+from jupyterlab.labapp import LabApp
 
 from .handlers import setup_handlers
 
@@ -13,7 +14,7 @@ from .handlers import setup_handlers
 EXTENSION_URL_PATH = 'ballet'
 
 
-def load_jupyter_server_extension(app):
+def load_jupyter_server_extension(app: LabApp):
     """Register the API handler
 
     Args:
@@ -21,5 +22,5 @@ def load_jupyter_server_extension(app):
             Notebook application instance
     """
     setup_handlers(app, EXTENSION_URL_PATH)
-    app.log.info('Registered ballet_submit_labextension extension at URL path /%s',
+    app.log.info('Registered ballet-submit-labextension extension at URL path /%s',
                  EXTENSION_URL_PATH)
