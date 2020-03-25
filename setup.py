@@ -38,7 +38,8 @@ data_files_spec = [
     ),
 ]
 
-cmdclass = create_cmdclass('jsdeps',
+cmdclass = create_cmdclass(
+    prerelease_cmd='jsdeps',
     package_data_spec=package_data_spec,
     data_files_spec=data_files_spec
 )
