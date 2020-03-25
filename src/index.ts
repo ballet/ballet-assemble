@@ -22,39 +22,17 @@ import {
   ISettingRegistry
 } from '@jupyterlab/settingregistry';
 
-import axios from 'axios';
-
 import {
   ConfirmWidget, FeatureSubmittedOkayWidget
 } from './widgets';
 
+import {
+  ISubmissionResponse, checkStatus, submit
+} from './serverextension';
 
-interface ISubmissionResponse {
-  result: boolean;
-  url?: string;
-  message?: string;
-}
 
-async function postModule(cellContents: string, submitUrl: string): Promise<ISubmissionResponse> {
-  try {
-    const response = await axios.post(submitUrl, {
-      codeContent: cellContents,
-    })
-    return response.data
-  } catch (error) {
-    console.log(error);
-    return { result: false }
-  }
-}
-
-async function loadSubmitUrl(settingRegistry: ISettingRegistry): Promise<string> {
-  return (
-     await settingRegistry.get(
-       'ballet-submit-labextension:plugin',
-       'submitUrl'
-     )
-   ).composite as string;
-}
+const EXTENSION_NAME = 'ballet-submit-labextension';
+const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
 
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
@@ -65,6 +43,10 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 
   constructor(settingRegistry: ISettingRegistry) {
     this.settingRegistry = settingRegistry;
+  }
+
+  async loadSetting(settingName: string): Promise<string> {
+    return (await this.settingRegistry.get(PLUGIN_ID, settingName)).composite as string;
   }
 
   /**
@@ -89,8 +71,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 
       // post contents to ballet-submit-server
       console.log(contents);
-      const submitUrl = await loadSubmitUrl(this.settingRegistry);
-      const result = await postModule(contents, submitUrl);
+      const result: ISubmissionResponse = await submit(contents);
 
       // try to add a message to cell outputs
       if (result.result) {
@@ -132,11 +113,7 @@ async function activate(
   palette: ICommandPalette,
   settingRegistry: ISettingRegistry
 ): Promise<void> {
-  console.log('JupyterLab extension ballet-submit-labextension is activated!');
-
-  // log submit url
-  const submitUrl: string = await loadSubmitUrl(settingRegistry);
-  console.log(`Will be submitting to ${submitUrl}`);
+  console.log(`JupyterLab extension ${EXTENSION_NAME} is activated!`);
 
   // add button to toolbar
   app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension(settingRegistry));
@@ -152,13 +129,18 @@ async function activate(
 
   // add command to palette
   palette.addItem({command, category: 'Ballet'});
+
+  // check status of /ballet endpoints
+  checkStatus()
+    .then(() => console.log('Connected to /ballet endpoints'))
+    .catch(() => console.error('Can\'t connect to /ballet endpoints'));
 }
 
 /**
  * Initialization data for the ballet-submit-labextension extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-  id: 'ballet-submit-labextension:plugin',
+  id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette, ISettingRegistry],
   activate: activate

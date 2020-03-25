@@ -1,6 +1,37 @@
-import { URLExt } from "@jupyterlab/coreutils";
+import { URLExt } from '@jupyterlab/coreutils';
 
-import { ServerConnection } from "@jupyterlab/services";
+import { ServerConnection } from '@jupyterlab/services';
+
+export interface ISubmissionRequest {
+  codeContent: string;
+}
+
+export interface ISubmissionResponse {
+  result: boolean;
+  url?: string;
+  message?: string;
+}
+
+export async function submit(cellContents: string): Promise<ISubmissionResponse> {
+  const endPoint = 'submit'
+  const init = {
+    method: 'POST',
+    body: JSON.stringify({
+      codeContent: cellContents
+    })
+  }
+
+  try {
+    return await request<ISubmissionResponse>(endPoint, init)
+  } catch (error) {
+    console.error(error);
+    return { result: false }
+  }
+}
+
+export async function checkStatus(): Promise<void> {
+  return request<void>('status');
+}
 
 /**
  * Call the API extension
@@ -9,15 +40,15 @@ import { ServerConnection } from "@jupyterlab/services";
  * @param init Initial values for the request
  * @returns The response body interpreted as JSON
  */
-export async function requestAPI<T>(
-  endPoint: string = "",
+export async function request<T>(
+  endPoint: string = '',
   init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
   const requestUrl = URLExt.join(
     settings.baseUrl,
-    "ballet",
+    'ballet',
     endPoint
   );
 
