@@ -1,7 +1,7 @@
 from functools import partial
 
 import tornado
-from jupyterlab.labapp import LabApp
+from notebook.notebookapp import NotebookWebApplication
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -12,6 +12,7 @@ class StatusHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
+        self.set_header('Content-Type', 'text/plain')
         self.finish('OK')
 
 
@@ -24,9 +25,9 @@ class SubmitHandler(APIHandler):
         self.write(result)
 
 
-def setup_handlers(app: LabApp, url_path: str):
+def setup_handlers(app: NotebookWebApplication, url_path: str):
     host_pattern = '.*$'
-    base_url = app.base_url
+    base_url = app.settings['base_url']
     route_pattern = partial(url_path_join, base_url, url_path)
 
     app.add_handlers(host_pattern, [
