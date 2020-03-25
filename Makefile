@@ -56,7 +56,7 @@ test: test-install test-python-lib test-js-lib ## test
 
 .PHONY: test-install
 test-install:
-	pip install -e .
+	pip install .
 	jupyter lab build
 	jupyter serverextension list
 	jupyter labextension list
@@ -101,4 +101,3 @@ install-test: clean-build clean-pyc ## install the package and test dependencies
 .PHONY: install-develop
 install-develop: clean-build clean-pyc ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
-

@@ -27,12 +27,12 @@
   },
   "scripts": {
     "build": "jlpm run build:lib",
-    "build:labextension": "cd server/ballet-submit-labextension && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../../..",
+    "build:labextension": "cd server/ballet_submit_labextension && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../../..",
     "build:lib": "tsc",
     "build:all": "jlpm run build:labextension",
     "clean": "jlpm run clean:lib",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
-    "clean:labextension": "rimraf server/ballet-submit-labextension/labextension",
+    "clean:labextension": "rimraf server/ballet_submit_labextension/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "lint": "jlpm run tslint && jlpm run prettier",
     "prepare": "jlpm run clean && jlpm run build",
@@ -69,7 +69,7 @@
           "pip"
         ],
         "base": {
-          "name": "ballet-submit-labextension"
+          "name": "ballet_submit_labextension"
         }
       }
     },
