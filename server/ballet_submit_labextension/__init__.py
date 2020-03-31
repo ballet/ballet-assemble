@@ -10,7 +10,6 @@ from jupyterlab.labapp import LabApp
 
 from .handlers import setup_handlers
 
-
 EXTENSION_URL_PATH = 'ballet'
 
 

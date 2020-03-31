@@ -74,11 +74,11 @@ test-js-lib: ## run js tests
 lint: ## check style with flake8 and isort
 	flake8 server/ballet_submit_labextension
 	isort -c --recursive server/ballet_submit_labextension
-	jlpm run
 
 .PHONY: release
 release: dist ## package and upload a release
 	twine upload dist/*
+	jlpm publish
 
 .PHONY: test-release
 test-release: dist ## package and upload a release on TestPyPI
@@ -93,11 +93,19 @@ dist: clean ## builds source and wheel package
 .PHONY: install
 install: clean-build clean-pyc ## install the package to the active Python's site-packages
 	pip install .
+	jupyter lab build
 
 .PHONY: install-test
 install-test: clean-build clean-pyc ## install the package and test dependencies
 	pip  install .[test]
+	jupyter lab build
 
 .PHONY: install-develop
 install-develop: clean-build clean-pyc ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
+	jupyter serverextension enable --py ballet_submit_labextension
+	jlpm
+	jlpm build
+	jupyter labextension link
+	jlpm build
+	jupyter lab build

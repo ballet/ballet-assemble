@@ -1,8 +1,8 @@
 from functools import partial
 
 import tornado
-from notebook.notebookapp import NotebookWebApplication
 from notebook.base.handlers import APIHandler
+from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
 
 from .submit import create_pull_request_for_code_content
@@ -12,8 +12,7 @@ class StatusHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.set_header('Content-Type', 'text/plain')
-        self.finish('OK')
+        self.write({'status': 'OK'})
 
 
 class SubmitHandler(APIHandler):
