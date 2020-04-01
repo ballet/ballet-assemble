@@ -10,19 +10,67 @@ from typing import List, Tuple
 import ballet.templating
 import funcy as fy
 import git
+from ballet.project import Project
 from ballet.util import truthy
 from ballet.util.code import blacken_code, is_valid_python
 from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
 from stacklog import stacklog
+from traitlets import Bool, HasTraits, Unicode, default
 
 
 USERNAME = 'ballet-demo-user-1'
-PASSWORD = getenv('GITHUB_TOKEN')
-REPO_NAME = 'ballet-predict-house-prices'
-REPO_URL = f'https://{USERNAME}:{PASSWORD}@github.com/{USERNAME}/{REPO_NAME}'
-UPSTREAM_REPO_SPEC = f'HDI-Project/{REPO_NAME}'
+REPONAME = 'ballet-predict-house-prices'
+GITHUB_OWNER = 'HDI-Project'
+
+project = Project.from_cwd()
+
+
+class BalletApp(HasTraits):
+
+    debug = Bool()
+
+    @default('debug')
+    def _default_debug(self):
+        _default = 'False'
+        return truthy(getenv('BALLET_DEBUG', default=_default))
+
+    username = Unicode()
+
+    @default('username')
+    def _default_username(self):
+        return getenv('BALLET_SUBMIT_USERNAME', USERNAME)
+
+    password = Unicode()
+    @default('password')
+    def _default_password(self):
+        return getenv('GITHUB_TOKEN')
+
+    reponame = Unicode()
+
+    @default('reponame')
+    def _default_reponame(self):
+        return project.config.get('project.project_slug', REPONAME)
+
+    upstream_repo_spec = Unicode()
+
+    @default('upstream_repo_spec')
+    def _default_upstream_repo_spec(self):
+        github_owner = project.config.get('github.github_owner', GITHUB_OWNER)
+        return f'{github_owner}/{self.reponame}'
+
+    repo_spec = Unicode()
+
+    @default('repo_spec')
+    def _default_repo_spec(self):
+        return f'{self.username}/{self.reponame}'
+
+    repo_url = Unicode()
+
+    @default('repo_url')
+    def _default_repo_url(self):
+        return f'https://{self.username}:{self.password}@github.com/{self.repo_spec}'
 
 
 @dataclass
