@@ -5,7 +5,7 @@ from notebook.base.handlers import APIHandler
 from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
 
-from .submit import create_pull_request_for_code_content
+from .submit import BalletApp
 
 
 class StatusHandler(APIHandler):
@@ -20,7 +20,8 @@ class SubmitHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         input_data = self.get_json_body()
-        result = create_pull_request_for_code_content(input_data)
+        app = BalletApp(self.log)
+        result = app.create_pull_request_for_code_content(input_data)
         self.write(result)
 
 
