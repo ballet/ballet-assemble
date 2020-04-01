@@ -40,6 +40,8 @@ class Request:
 
 def stacklog(level, message):
     """Stacklog decorator that uses instance method's `.logger` at given level"""
+    level = logging.getLevelName(level)
+
     def decorator(func):
         @fy.wraps(func)
         def wrapped(self, *args, **kwargs):
@@ -79,7 +81,7 @@ class BalletApp(HasTraits):
 
     # -- begin traits --
 
-    debug = Bool(True)
+    debug = Bool()
     @default('debug')
     def _default_debug(self):
         _default = 'False'
@@ -124,17 +126,18 @@ class BalletApp(HasTraits):
     # -- end traits --
 
     def __init__(self, logger: logging.Logger):
-        print(f'__file__: {__file__}')
-        print(f'cwd: {pathlib.Path.cwd()}')
-        self.project = Project.from_cwd()
         self.logger = logger
+
+    @fy.cached_property
+    def project(self):
+        return Project.from_cwd()
 
     @fy.cached_property
     def github(self):
         return Github(self.password)
 
-    @handlefailures
     @fy.post_processing(asdict)
+    @handlefailures
     def create_pull_request_for_code_content(self, input_data: dict):
         code_content = self.load_request(input_data)
         self.check_code_is_valid(code_content)
