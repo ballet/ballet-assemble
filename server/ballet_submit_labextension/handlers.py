@@ -20,7 +20,7 @@ class SubmitHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         input_data = self.get_json_body()
-        app = BalletApp(self.log)
+        app = BalletApp(config=self.config)
         result = app.create_pull_request_for_code_content(input_data)
         self.write(result)
 

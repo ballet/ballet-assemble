@@ -17,7 +17,8 @@ from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
 from stacklog import stacklog as _stacklog
-from traitlets import Bool, HasTraits, Unicode, default
+from traitlets import Bool, Unicode, default
+from traitlets.config import LoggingConfigurable
 
 USERNAME = 'ballet-demo-user-1'
 USEREMAIL = 'ballet-demo-user-1@mit.edu'
@@ -45,7 +46,7 @@ def stacklog(level, message):
     def decorator(func):
         @fy.wraps(func)
         def wrapped(self, *args, **kwargs):
-            with _stacklog(fy.partial(self.logger.log, level), message):
+            with _stacklog(fy.partial(self.log.log, level), message):
                 return func(self, *args, **kwargs)
         return wrapped
     return decorator
@@ -77,56 +78,89 @@ def handlefailures(call):
         return Response(result=False, message=message)
 
 
-class BalletApp(HasTraits):
+class BalletApp(LoggingConfigurable):
 
     # -- begin traits --
 
-    debug = Bool()
+    debug = Bool(
+        config=True,
+        help='enable debug mode (no changes made on GitHub)',
+    )
     @default('debug')
     def _default_debug(self):
         _default = 'False'
+        # fixme: truthy only works on strings as of ballet==0.6.11
         return truthy(getenv('BALLET_DEBUG', default=_default))
 
-    username = Unicode()
+    username = Unicode(
+        config=True,
+        help='github username',
+    )
     @default('username')
     def _default_username(self):
         return getenv('BALLET_SUBMIT_USERNAME', USERNAME)
 
-    password = Unicode()
-    @default('password')
-    def _default_password(self):
-        return getenv('GITHUB_TOKEN')
+    token = Unicode(
+        config=True,
+        help='github personal access token'
+    )
+    @default('token')
+    def _default_token(self):
+        return getenv('GITHUB_TOKEN', '')
 
-    useremail = Unicode()
+    useremail = Unicode(
+        config=True,
+        help='email address to associate with git commit messages',
+    )
     @default('useremail')
     def _default_useremail(self):
-        return getenv('BALLET_SUBMIT_USEREMAIL', USEREMAIL)
+        # 1. load from environment variable
+        # 2. detect user.email already configured with git
+        # 3. construct <username>@users.noreply.github.com
+        email = getenv('BALLET_SUBMIT_USEREMAIL')
+        if email is not None:
+            return email
 
-    reponame = Unicode()
+        email = self.project.repo.config_reader().get_value('user', 'email', default=None)
+        if email is not None:
+            return email
+
+        return f'{self.username}@users.noreply.github.com'
+
+    reponame = Unicode(
+        config=False,
+        help='name of project repo',
+    )
     @default('reponame')
     def _default_reponame(self):
         return self.project.config.get('project.project_slug', REPONAME)
 
-    upstream_repo_spec = Unicode()
+    upstream_repo_spec = Unicode(
+        config=False,
+        help='spec of upstream repo of the form "username/reponame"'
+    )
     @default('upstream_repo_spec')
     def _default_upstream_repo_spec(self):
         github_owner = self.project.config.get('github.github_owner', GITHUB_OWNER)
         return f'{github_owner}/{self.reponame}'
 
-    repo_spec = Unicode()
+    repo_spec = Unicode(
+        config=False,
+        help='spec of forked repo of the form "username/reponame"',
+    )
     @default('repo_spec')
     def _default_repo_spec(self):
         return f'{self.username}/{self.reponame}'
 
-    repo_url = Unicode()
+    repo_url = Unicode(
+        config=False,
+        help='url of forked repo, including username and password authentication'
+    )
     @default('repo_url')
     def _default_repo_url(self):
-        return f'https://{self.username}:{self.password}@github.com/{self.repo_spec}'
+        return f'https://{self.username}:{self.token}@github.com/{self.repo_spec}'
 
     # -- end traits --
-
-    def __init__(self, logger: logging.Logger):
-        self.logger = logger
 
     @fy.cached_property
     def project(self):
@@ -134,7 +168,7 @@ class BalletApp(HasTraits):
 
     @fy.cached_property
     def github(self):
-        return Github(self.password)
+        return Github(self.token)
 
     @fy.post_processing(asdict)
     @handlefailures
@@ -234,7 +268,7 @@ class BalletApp(HasTraits):
         base = 'master'
         head = f'{self.username}:{branch_name}'
         maintainer_can_modify = True
-        self.logger.debug(
+        self.log.debug(
             'About to create pull: title=%s, body=%s, base=%s, head=%s',
             title, body, base, head)
         if not self.debug:
