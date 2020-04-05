@@ -16,12 +16,38 @@ for the frontend extension.
 
 ## Install
 
-Note: You will need NodeJS to install the extension.
-
 ```bash
 pip install ballet-submit-labextension
 jupyter lab build
 ```
+
+Note: You will need NodeJS to install the extension; the installation process
+will complain if it is not found.
+
+## Configure
+
+The extension ties into the same configuration system as Jupyter [Lab] itself.
+
+1. Determine the path to your jupyter config file (you may have to create it 
+if it does not exist):
+
+    ```bash
+    touch "$(jupyter --config-dir)/jupyter_notebook_config.py"
+    ```
+
+2. Append the following config to the end of the file:
+
+    ```python
+    c.BalletApp.username = 'github username'
+    c.BalletApp.token = 'github personal access token'
+    ```
+    
+    You can optionally also configure the following:
+    
+    ```python
+    c.BalletApp.useremail = 'email address to associate with git commit messages'
+    c.BalletApp.debug = 'enable debug mode (no changes made on GitHub)'
+    ```
 
 ## Troubleshoot
 
