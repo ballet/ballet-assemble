@@ -15,6 +15,17 @@ class StatusHandler(APIHandler):
         self.write({'status': 'OK'})
 
 
+class ConfigHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+        app = BalletApp(config=self.config)
+        result = {}
+        for attr in app.class_own_traits():
+            result[attr] = getattr(app, attr)
+        self.write(result)
+
+
 class SubmitHandler(APIHandler):
 
     @tornado.web.authenticated
@@ -32,5 +43,6 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
 
     app.add_handlers(host_pattern, [
         (route_pattern('status'), StatusHandler),
+        (route_pattern('config'), ConfigHandler),
         (route_pattern('submit'), SubmitHandler)
     ])
