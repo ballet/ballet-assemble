@@ -21,7 +21,6 @@ from traitlets import Bool, Unicode, default
 from traitlets.config import LoggingConfigurable
 
 USERNAME = 'ballet-demo-user-1'
-USEREMAIL = 'ballet-demo-user-1@mit.edu'
 REPONAME = 'ballet-predict-house-prices'
 GITHUB_OWNER = 'HDI-Project'
 TESTING_URL = 'http://some/testing/url'
@@ -172,7 +171,7 @@ class BalletApp(LoggingConfigurable):
 
     @fy.post_processing(asdict)
     @handlefailures
-    def create_pull_request_for_code_content(self, input_data: dict):
+    def create_pull_request_for_code_content(self, input_data: dict) -> Response:
         code_content = self.load_request(input_data)
         self.check_code_is_valid(code_content)
 
