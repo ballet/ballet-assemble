@@ -1,3 +1,4 @@
+import getpass
 import logging
 import pathlib
 import tempfile
@@ -20,9 +21,6 @@ from stacklog import stacklog as _stacklog
 from traitlets import Bool, Unicode, default
 from traitlets.config import LoggingConfigurable
 
-USERNAME = 'ballet-demo-user-1'
-REPONAME = 'ballet-predict-house-prices'
-GITHUB_OWNER = 'HDI-Project'
 TESTING_URL = 'http://some/testing/url'
 
 
@@ -97,7 +95,18 @@ class BalletApp(LoggingConfigurable):
     )
     @default('username')
     def _default_username(self):
-        return getenv('BALLET_SUBMIT_USERNAME', USERNAME)
+        # 1. load from environment variable
+        # 2. detect github.user already configured with git (non-standard)
+        # 3. use $USER
+        username = getenv('BALLET_SUBMIT_USERNAME')
+        if username is not None:
+            return username
+
+        username = self.project.repo.config_reader().get_value('github', 'user', default=None)
+        if username is not None:
+            return username
+
+        return getpass.getuser()
 
     token = Unicode(
         config=True,
@@ -132,7 +141,7 @@ class BalletApp(LoggingConfigurable):
     )
     @default('reponame')
     def _default_reponame(self):
-        return self.project.config.get('project.project_slug', REPONAME)
+        return self.project.config.get('project.project_slug', '')
 
     upstream_repo_spec = Unicode(
         config=False,
@@ -140,7 +149,7 @@ class BalletApp(LoggingConfigurable):
     )
     @default('upstream_repo_spec')
     def _default_upstream_repo_spec(self):
-        github_owner = self.project.config.get('github.github_owner', GITHUB_OWNER)
+        github_owner = self.project.config.get('github.github_owner', '')
         return f'{github_owner}/{self.reponame}'
 
     repo_spec = Unicode(
