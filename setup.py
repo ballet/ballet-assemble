@@ -69,7 +69,7 @@ test_requirements = [
 
 development_requirements = [
     # general
-    'bumpversion>=0.5.3',
+    'bump2version>=1.0.0',
     'pip>=9.0.1',
 
     # style check
