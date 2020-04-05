@@ -252,6 +252,8 @@ class BalletApp(LoggingConfigurable):
         refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
         if not self.debug:
             repo.remote().push(refspec=refspec)
+        else:
+            self.log.debug('Didn\'t actually push to remote due to debug')
 
     @stacklog('INFO', 'Creating pull request')
     def create_pull_request(self, feature_name, branch_name):
@@ -270,11 +272,17 @@ class BalletApp(LoggingConfigurable):
         self.log.debug(
             'About to create pull: title=%s, body=%s, base=%s, head=%s',
             title, body, base, head)
+
+        self.log.debug(
+            'About to create pull: title=%s, body=%s, base=%s, head=%s',
+            title, body, base, head,
+        )
         if not self.debug:
             pr = grepo.create_pull(title=title, body=body, base=base, head=head,
                                    maintainer_can_modify=maintainer_can_modify)
             url = pr.html_url
         else:
+            self.log.debug('Didn\'t create real pull request due to debug')
             url = TESTING_URL
 
         return Response(result=True, url=url)
