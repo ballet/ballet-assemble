@@ -47,7 +47,14 @@ if it does not exist):
     ```python
     c.BalletApp.useremail = 'email address to associate with git commit messages'
     c.BalletApp.debug = 'enable debug mode (no changes made on GitHub)'
+    c.BalletApp.ballet_yml_path = 'path to ballet.yml file of Ballet project (if Lab is not run from project directory)'
     ```
+    
+To see more details on available configuration options, run
+
+```bash
+python -c 'from ballet_submit_labextension.submit import print_help;print_help()'
+```
 
 ## Troubleshoot
 

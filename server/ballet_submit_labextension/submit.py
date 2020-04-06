@@ -322,3 +322,11 @@ class BalletApp(LoggingConfigurable):
             url = TESTING_URL
 
         return Response(result=True, url=url)
+
+
+def print_help():
+    BalletApp.class_print_help()
+
+
+if __name__ == '__main__':
+    print_help()
