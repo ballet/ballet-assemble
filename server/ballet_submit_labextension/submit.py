@@ -11,14 +11,16 @@ from typing import List, Tuple
 import ballet.templating
 import funcy as fy
 import git
+from ballet.exc import ConfigurationError
 from ballet.project import Project
 from ballet.util import truthy
 from ballet.util.code import blacken_code, is_valid_python
 from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
+from notebook.notebookapp import NotebookApp
 from stacklog import stacklog as _stacklog
-from traitlets import Bool, Unicode, default
+from traitlets import Bool, Unicode, default, validate
 from traitlets.config import LoggingConfigurable
 
 TESTING_URL = 'http://some/testing/url'
@@ -135,6 +137,18 @@ class BalletApp(LoggingConfigurable):
 
         return f'{self.username}@users.noreply.github.com'
 
+    ballet_yml_path = Unicode(
+        '',
+        config=True,
+        help='path to ballet.yml file of Ballet project (if Lab is not run from project directory)'
+    )
+    @validate('ballet_yml_path')
+    def _validate_ballet_yml_path(self, proposal):
+        if proposal:
+            return pathlib.Path(proposal).expanduser().resolve()
+        else:
+            return proposal
+
     reponame = Unicode(
         config=False,
         help='name of project repo',
@@ -172,7 +186,20 @@ class BalletApp(LoggingConfigurable):
 
     @fy.cached_property
     def project(self):
-        return Project.from_cwd()
+        # 1. configuration option passed explicitly
+        # 2. from notebooks dir
+        # 3. from cwd
+        if self.ballet_yml_path:
+            return Project.from_path(self.ballet_yml_path)
+
+        path = NotebookApp.notebook_dir
+        with fy.suppress(Exception):
+            return Project.from_path(path)
+
+        with fy.suppress(Exception):
+            return Project.from_cwd()
+
+        raise ConfigurationError('Could not detect ballet project')
 
     @fy.cached_property
     def github(self):
