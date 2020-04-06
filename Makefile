@@ -78,7 +78,7 @@ lint: ## check style with flake8 and isort
 .PHONY: release
 release: dist ## package and upload a release
 	twine upload dist/*
-	jlpm publish
+	jlpm publish --non-interactive  # don't bump here!
 
 .PHONY: test-release
 test-release: dist ## package and upload a release on TestPyPI

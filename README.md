@@ -1,6 +1,6 @@
 ![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Build/badge.svg)
-![npm version](https://img.shields.io/npm/v/ballet-submit-labextension)
-![PyPI Shield](https://img.shields.io/pypi/v/ballet-submit-labextension.svg)
+[![PyPI Shield](https://img.shields.io/pypi/v/ballet-submit-labextension.svg)](https://pypi.org/project/ballet-submit-labextension)
+[![npm version](https://img.shields.io/npm/v/ballet-submit-labextension)](https://www.npmjs.com/package/ballet-submit-labextension)
 
 # ballet-submit-labextension
 
@@ -15,6 +15,11 @@ for the frontend extension.
 - JupyterLab >= 2.0
 
 ## Install
+
+Installation can be done completely using `pip`, which installs both the 
+server and the frontend extensions. The frontend extension only can be 
+installed using `jupyter labextension install` but will not function properly
+without the corresponding server extension.
 
 ```bash
 pip install ballet-submit-labextension
@@ -120,5 +125,5 @@ jupyter lab --watch
 
 ```bash
 pip uninstall ballet-submit-labextension
-jupyter labextension uninstall jupyterlab_ballet-submit-labextension
+jupyter labextension uninstall ballet-submit-labextension
 ```
