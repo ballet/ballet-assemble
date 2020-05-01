@@ -64,7 +64,7 @@ test-install:
 
 .PHONY: test-python-lib
 test-python-lib: ## run python tests
-	python -m pytest --basetemp=${ENVTMP} --cov=ballet
+	python -m pytest -v --basetemp=${ENVTMP} --cov=ballet_submit_labextension server
 
 .PHONY: test-js-lib
 test-js-lib: ## run js tests
