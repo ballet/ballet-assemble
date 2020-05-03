@@ -18,6 +18,7 @@ from ballet.util.code import blacken_code, is_valid_python
 from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
+from jupyter_core.application import JupyterApp
 from notebook.notebookapp import NotebookApp
 from stacklog import stacklog as _stacklog
 from traitlets import Bool, Unicode, default, validate
@@ -77,7 +78,7 @@ def handlefailures(call):
         return Response(result=False, message=message)
 
 
-class BalletApp(LoggingConfigurable):
+class BalletApp(JupyterApp):
 
     # -- begin traits --
 
@@ -116,7 +117,9 @@ class BalletApp(LoggingConfigurable):
     )
     @default('token')
     def _default_token(self):
-        return getenv('GITHUB_TOKEN', '')
+        token = getenv('GITHUB_TOKEN')
+        if token is not None:
+            return token
 
     useremail = Unicode(
         config=True,
