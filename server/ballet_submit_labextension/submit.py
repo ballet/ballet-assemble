@@ -1,4 +1,3 @@
-import getpass
 import logging
 import pathlib
 import tempfile
@@ -18,11 +17,10 @@ from ballet.util.code import blacken_code, is_valid_python
 from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
-from jupyter_core.application import JupyterApp
 from notebook.notebookapp import NotebookApp
 from stacklog import stacklog as _stacklog
 from traitlets import Bool, Unicode, default, validate
-from traitlets.config import LoggingConfigurable
+from traitlets.config import SingletonConfigurable
 
 TESTING_URL = 'http://some/testing/url'
 
@@ -78,7 +76,7 @@ def handlefailures(call):
         return Response(result=False, message=message)
 
 
-class BalletApp(JupyterApp):
+class BalletApp(SingletonConfigurable):
 
     # -- begin traits --
 
@@ -92,53 +90,13 @@ class BalletApp(JupyterApp):
         # fixme: truthy only works on strings as of ballet==0.6.11
         return truthy(getenv('BALLET_DEBUG', default=_default))
 
-    username = Unicode(
-        config=True,
-        help='github username',
-    )
-    @default('username')
-    def _default_username(self):
-        # 1. load from environment variable
-        # 2. detect github.user already configured with git (non-standard)
-        # 3. use $USER
-        username = getenv('BALLET_SUBMIT_USERNAME')
-        if username is not None:
-            return username
-
-        username = self.project.repo.config_reader().get_value('github', 'user', default=None)
-        if username is not None:
-            return username
-
-        return getpass.getuser()
-
     token = Unicode(
         config=True,
         help='github personal access token'
     )
     @default('token')
     def _default_token(self):
-        token = getenv('GITHUB_TOKEN')
-        if token is not None:
-            return token
-
-    useremail = Unicode(
-        config=True,
-        help='email address to associate with git commit messages',
-    )
-    @default('useremail')
-    def _default_useremail(self):
-        # 1. load from environment variable
-        # 2. detect user.email already configured with git
-        # 3. construct <username>@users.noreply.github.com
-        email = getenv('BALLET_SUBMIT_USEREMAIL')
-        if email is not None:
-            return email
-
-        email = self.project.repo.config_reader().get_value('user', 'email', default=None)
-        if email is not None:
-            return email
-
-        return f'{self.username}@users.noreply.github.com'
+        return getenv('GITHUB_TOKEN', '')
 
     ballet_yml_path = Unicode(
         '',
@@ -152,42 +110,41 @@ class BalletApp(JupyterApp):
         else:
             return proposal
 
-    reponame = Unicode(
-        config=False,
-        help='name of project repo',
-    )
-    @default('reponame')
-    def _default_reponame(self):
+    # -- end traits --
+
+    def set_token(self, token):
+        self.token = token
+
+    @property
+    def github(self):
+        return Github(self.token)
+
+    @property
+    def username(self):
+        return self.github.get_user().login
+
+    @property
+    def useremail(self):
+        # in lieu of requesting `user:email` scope
+        return f'{self.username}@users.noreply.github.com'
+
+    @property
+    def reponame(self):
+        """name of project repo"""
         return self.project.config.get('project.project_slug', '')
 
-    upstream_repo_spec = Unicode(
-        config=False,
-        help='spec of upstream repo of the form "username/reponame"'
-    )
-    @default('upstream_repo_spec')
-    def _default_upstream_repo_spec(self):
+    @property
+    def upstream_repo_spec(self):
+        """refspec of upstream repo of the form 'username/reponame'"""
         github_owner = self.project.config.get('github.github_owner', '')
         return f'{github_owner}/{self.reponame}'
 
-    repo_spec = Unicode(
-        config=False,
-        help='spec of forked repo of the form "username/reponame"',
-    )
-    @default('repo_spec')
-    def _default_repo_spec(self):
-        return f'{self.username}/{self.reponame}'
+    @property
+    def repo_url(self):
+        """url of forked repo, including token-based authentication"""
+        return f'https://{self.token}@github.com/{self.username}/{self.reponame}'
 
-    repo_url = Unicode(
-        config=False,
-        help='url of forked repo, including username and password authentication'
-    )
-    @default('repo_url')
-    def _default_repo_url(self):
-        return f'https://{self.username}:{self.token}@github.com/{self.repo_spec}'
-
-    # -- end traits --
-
-    @fy.cached_property
+    @property
     def project(self):
         # 1. configuration option passed explicitly
         # 2. from notebooks dir
@@ -204,10 +161,6 @@ class BalletApp(JupyterApp):
 
         raise ConfigurationError('Could not detect ballet project')
 
-    @fy.cached_property
-    def github(self):
-        return Github(self.token)
-
     @fy.post_processing(asdict)
     @handlefailures
     def create_pull_request_for_code_content(self, input_data: dict) -> Response:
@@ -222,7 +175,7 @@ class BalletApp(JupyterApp):
                 feature_name, branch_name = self.create_new_branch(repo)
                 changed_files, new_feature_path = self.start_new_feature(dirname, feature_name)
                 self.write_code_content(new_feature_path, code_content)
-                self.commit_changes(repo,  changed_files)
+                self.commit_changes(repo, changed_files)
                 self.push_to_remote(repo, branch_name)
                 return self.create_pull_request(feature_name, branch_name)
 
@@ -231,7 +184,7 @@ class BalletApp(JupyterApp):
         try:
             req = Request(**input_data)
         except TypeError as e:
-            raise TypeError(f'Bad request - {e!s}') from e
+            raise TypeError(f'Bad request - {e}') from e
         return req.codeContent
 
     @stacklog('INFO', 'Checking for valid code')

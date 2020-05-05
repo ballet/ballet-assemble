@@ -26,6 +26,12 @@ def load_jupyter_server_extension(app: LabApp):
         app (notebook.notebookapp.NotebookApp)
             Notebook application instance
     """
+
+    # initialize app instance
+    from .submit import BalletApp
+    BalletApp.clear_instance()
+    BalletApp.instance(config=app.config)
+
     setup_handlers(app.web_app, EXTENSION_URL_PATH)
     app.log.info('Registered ballet-submit-labextension extension at URL path /%s',
                  EXTENSION_URL_PATH)
