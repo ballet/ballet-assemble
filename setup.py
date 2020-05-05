@@ -57,8 +57,12 @@ install_requires = [
     'black==19.10b0',
     'ballet',
     'funcy',
+    'gitpython',
+    'notebook',
     'pygithub',
     'stacklog',
+    'requests',
+    'tornado',
 ]
 
 test_requirements = [

@@ -1,4 +1,6 @@
+import base64
 import logging
+import os
 import pathlib
 import tempfile
 import uuid
@@ -6,10 +8,12 @@ from dataclasses import asdict, dataclass
 from os import getenv
 from textwrap import dedent
 from typing import List, Tuple
+from urllib.parse import urljoin
 
 import ballet.templating
 import funcy as fy
 import git
+import requests
 from ballet.exc import ConfigurationError
 from ballet.project import Project
 from ballet.util import truthy
@@ -67,6 +71,10 @@ def get_new_feature_path(changes: List[Tuple[str, str]]):
     return None
 
 
+def make_random_state():
+    return base64.urlsafe_b64encode(os.urandom(16)).decode()
+
+
 @fy.decorator
 def handlefailures(call):
     try:
@@ -110,7 +118,35 @@ class BalletApp(SingletonConfigurable):
         else:
             return proposal
 
+    ballet_oauth_gateway_url = Unicode(
+        'https://ballet-oauth-gateway.herokuapp.com/',
+        config=True,
+        help='url to ballet-oauth-gateway server',
+    )
+
     # -- end traits --
+
+    @fy.cached_property
+    def client_id(self):
+        base = self.ballet_oauth_gateway_url
+        url = urljoin(base, '/api/v1/app_id')
+        response = requests.get(url)
+        response.raise_for_status()
+        d = response.json()
+        return d['client_id']
+
+    scopes = ['read:user', 'public_repo']
+    _state = None
+
+    @property
+    def state(self):
+        if self._state is None:
+            self._state = make_random_state()
+
+        return self._state
+
+    def reset_state(self):
+        self._state = None
 
     def set_token(self, token):
         self.token = token
