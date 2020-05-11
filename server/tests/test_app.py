@@ -34,3 +34,11 @@ class BalletHandlersTest(BaseTestCase):
         response = self.request('GET', '/ballet/status')
         d = response.json()
         assert 'OK' == d['status']
+
+    def test_config(self):
+        traits = BalletApp.class_own_traits()
+
+        response = self.request('GET', '/ballet/config')
+        d = response.json()
+
+        assert d.keys() == traits.keys()
