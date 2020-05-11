@@ -31,7 +31,6 @@ class BaseTestCase(NotebookTestBase):
 class BalletHandlersTest(BaseTestCase):
 
     def test_status(self):
-        pass
-        # response = self.request('GET', '/ballet/status')
-        # d = response.json()
-        # assert 'OK' == d['status']
+        response = self.request('GET', '/ballet/status')
+        d = response.json()
+        assert 'OK' == d['status']
