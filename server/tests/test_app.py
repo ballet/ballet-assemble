@@ -6,7 +6,7 @@ from traitlets.config import Config
 from notebook.tests.launchnotebook import NotebookTestBase
 
 from ballet_submit_labextension import load_jupyter_server_extension
-from ballet_submit_labextension.submit import BalletApp
+from ballet_submit_labextension.app import BalletApp
 
 
 @pytest.fixture

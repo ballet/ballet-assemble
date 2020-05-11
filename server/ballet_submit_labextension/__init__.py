@@ -28,7 +28,7 @@ def load_jupyter_server_extension(app: LabApp):
     """
 
     # initialize app instance
-    from .submit import BalletApp
+    from .app import BalletApp
     BalletApp.clear_instance()
     BalletApp.instance(config=app.config)
 

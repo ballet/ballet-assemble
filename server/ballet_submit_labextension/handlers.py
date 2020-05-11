@@ -8,7 +8,7 @@ from notebook.base.handlers import APIHandler, IPythonHandler
 from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
 
-from .submit import BalletApp
+from .app import BalletApp
 
 
 GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize'
