@@ -118,17 +118,17 @@ class BalletApp(SingletonConfigurable):
         else:
             return proposal
 
-    ballet_oauth_gateway_url = Unicode(
-        'https://ballet-oauth-gateway.herokuapp.com/',
+    oauth_gateway_url = Unicode(
+        'https://github-oauth-gateway.herokuapp.com/',
         config=True,
-        help='url to ballet-oauth-gateway server',
+        help='url to github-oauth-gateway server',
     )
 
     # -- end traits --
 
     @fy.cached_property
     def client_id(self):
-        base = self.ballet_oauth_gateway_url
+        base = self.oauth_gateway_url
         url = urljoin(base, '/api/v1/app_id')
         response = requests.get(url)
         response.raise_for_status()

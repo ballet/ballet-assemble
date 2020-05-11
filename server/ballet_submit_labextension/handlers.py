@@ -4,7 +4,7 @@ from urllib.parse import urlencode, urljoin
 
 import requests
 import tornado
-from notebook.base.handlers import APIHandler, AuthenticatedHandler
+from notebook.base.handlers import APIHandler, IPythonHandler
 from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
 
@@ -62,7 +62,7 @@ class SubmitHandler(APIHandler):
 #         app.set_token(token)
 
 
-class AuthorizeHandler(AuthenticatedHandler):
+class AuthorizeHandler(IPythonHandler):
 
     @tornado.web.authenticated
     def get(self):
@@ -71,10 +71,11 @@ class AuthorizeHandler(AuthenticatedHandler):
         # try to wake server - don't care about response
         threading.Thread(
             target=requests.get,
-            args=(app.ballet_oauth_gateway_url + '/status', ),
+            args=(urljoin(app.oauth_gateway_url, '/status'),),
         ).start()
 
         # do oauth flow
+        # TODO get port, prefix from settings?
         redirect_url = 'http://localhost:8888/ballet/auth/authorize/success'
         base = GITHUB_OAUTH_URL
         params = {
@@ -84,27 +85,30 @@ class AuthorizeHandler(AuthenticatedHandler):
             'redirect_url': redirect_url,
         }
 
-        url = base + urlencode(params)
+        url = base + '?' + urlencode(params)
         self.redirect(url, permanent=False)
 
         # clean up
         app.reset_state()
 
 
-class AuthorizeSuccessHandler(AuthenticatedHandler):
+class AuthorizeSuccessHandler(IPythonHandler):
 
     @tornado.web.authenticated
     def get(self):
         """callback indicating that we have authenticated"""
         app = BalletApp.instance()
-        base = app.ballet_oauth_gateway_url
+        base = app.oauth_gateway_url
         url = urljoin(base, '/api/v1/access_token')
         data = {
             'state': app.state,
         }
         response = requests.post(url, data=data)
-        response.raise_for_status()
         d = response.json()
+
+        if not response.ok:
+            reason = d.get('message')
+            self.send_error(status_code=400)
 
         # TODO also store other token info
         token = d['access_token']
