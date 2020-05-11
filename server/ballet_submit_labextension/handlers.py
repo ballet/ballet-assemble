@@ -41,26 +41,6 @@ class SubmitHandler(APIHandler):
         self.write(result)
 
 
-# class TokenHandler(APIHandler):
-#
-#     @tornado.web.authenticated
-#     def get(self):
-#         app = BalletApp.instance()
-#         result = {'access_token': app.token}
-#         self.write(result)
-#
-#     @tornado.web.authenticated
-#     def post(self):
-#         input_data = self.get_json_body()
-#         if 'access_token' not in input_data:
-#             self.send_error(status_code=400)
-#
-#         token = input_data['access_token']
-#
-#         app = BalletApp.instance()
-#         app.set_token(token)
-
-
 class AuthorizeHandler(IPythonHandler):
 
     @tornado.web.authenticated
@@ -126,7 +106,6 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
         (route_pattern('status'), StatusHandler),
         (route_pattern('config'), ConfigHandler),
         (route_pattern('submit'), SubmitHandler),
-        # (route_pattern('auth', 'token'), TokenHandler),
         (route_pattern('auth', 'authorize'), AuthorizeHandler),
         (route_pattern('auth', 'authorize', 'success'), AuthorizeSuccessHandler),
     ])
