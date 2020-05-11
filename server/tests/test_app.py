@@ -1,3 +1,5 @@
+import http
+
 import pytest
 from traitlets.config import Config
 
@@ -42,3 +44,8 @@ class BalletHandlersTest(BaseTestCase):
         d = response.json()
 
         assert d.keys() == traits.keys()
+
+    def test_auth_authorize(self):
+        response = self.request('GET', '/ballet/auth/authorize', allow_redirects=False)
+
+        assert response.status_code == http.HTTPStatus.FOUND
