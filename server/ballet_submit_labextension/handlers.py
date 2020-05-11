@@ -10,7 +10,6 @@ from notebook.utils import url_path_join
 
 from .app import BalletApp
 
-
 GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize'
 
 
@@ -108,7 +107,7 @@ class AuthorizeSuccessHandler(IPythonHandler):
 
         if not response.ok:
             reason = d.get('message')
-            self.send_error(status_code=400)
+            self.send_error(status_code=400, reason=reason)
 
         # TODO also store other token info
         token = d['access_token']
