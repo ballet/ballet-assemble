@@ -31,6 +31,18 @@ class ConfigHandler(APIHandler):
         self.write(result)
 
 
+class ConfigItemHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self, attr):
+        app = BalletApp.instance()
+        try:
+            param = getattr(app, attr)
+            self.write({attr: param})
+        except AttributeError:
+            self.send_error(404)
+
+
 class SubmitHandler(APIHandler):
 
     @tornado.web.authenticated
@@ -105,6 +117,7 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
     app.add_handlers(host_pattern, [
         (route_pattern('status'), StatusHandler),
         (route_pattern('config'), ConfigHandler),
+        (route_pattern(r'config/(.*)'), ConfigItemHandler),
         (route_pattern('submit'), SubmitHandler),
         (route_pattern('auth', 'authorize'), AuthorizeHandler),
         (route_pattern('auth', 'authorize', 'success'), AuthorizeSuccessHandler),
