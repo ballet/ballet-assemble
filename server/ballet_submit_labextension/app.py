@@ -114,7 +114,7 @@ class BalletApp(SingletonConfigurable):
     @validate('ballet_yml_path')
     def _validate_ballet_yml_path(self, proposal):
         if proposal:
-            return pathlib.Path(proposal).expanduser().resolve()
+            return str(pathlib.Path(proposal['value']).expanduser().resolve())
         else:
             return proposal
 
