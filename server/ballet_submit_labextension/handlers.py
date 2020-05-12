@@ -67,20 +67,17 @@ class AuthorizeHandler(IPythonHandler):
 
         # do oauth flow
         # TODO get port, prefix from settings?
-        redirect_url = 'http://localhost:8888/ballet/auth/authorize/success'
+        redirect_url = 'http://localhost:8888/ballet/auth/success'
         base = GITHUB_OAUTH_URL
         params = {
             'client_id': app.client_id,
             'state': app.state,
             'scope': ','.join(app.scopes),
-            'redirect_url': redirect_url,
+            'redirect_uri': redirect_url,
         }
 
         url = base + '?' + urlencode(params)
         self.redirect(url, permanent=False)
-
-        # clean up
-        app.reset_state()
 
 
 class AuthorizeSuccessHandler(IPythonHandler):
@@ -97,15 +94,16 @@ class AuthorizeSuccessHandler(IPythonHandler):
         response = requests.post(url, data=data)
         d = response.json()
 
-        if not response.ok:
+        if response.ok:
+            # TODO also store other token info
+            token = d['access_token']
+            app.set_token(token)
+        else:
             reason = d.get('message')
             self.send_error(status_code=400, reason=reason)
 
-        # TODO also store other token info
-        token = d['access_token']
-        app.set_token(token)
+        self.finish()
 
-        # just in case
         app.reset_state()
 
 
@@ -120,5 +118,5 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
         (route_pattern(r'config/(.*)'), ConfigItemHandler),
         (route_pattern('submit'), SubmitHandler),
         (route_pattern('auth', 'authorize'), AuthorizeHandler),
-        (route_pattern('auth', 'authorize', 'success'), AuthorizeSuccessHandler),
+        (route_pattern('auth', 'success'), AuthorizeSuccessHandler),
     ])
