@@ -66,14 +66,11 @@ class AuthorizeHandler(IPythonHandler):
         ).start()
 
         # do oauth flow
-        # TODO get port, prefix from settings?
-        redirect_url = 'http://localhost:8888/ballet/auth/success'
         base = GITHUB_OAUTH_URL
         params = {
             'client_id': app.client_id,
             'state': app.state,
             'scope': ','.join(app.scopes),
-            'redirect_uri': redirect_url,
         }
 
         url = base + '?' + urlencode(params)
@@ -91,18 +88,17 @@ class AuthorizeSuccessHandler(IPythonHandler):
         data = {
             'state': app.state,
         }
-        response = requests.post(url, data=data)
+        response = requests.post(url, json=data)
         d = response.json()
 
         if response.ok:
             # TODO also store other token info
             token = d['access_token']
             app.set_token(token)
+            self.finish()
         else:
             reason = d.get('message')
             self.send_error(status_code=400, reason=reason)
-
-        self.finish()
 
         app.reset_state()
 
