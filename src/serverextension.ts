@@ -12,6 +12,10 @@ export interface ISubmissionResponse {
   message?: string;
 }
 
+export interface IAuthenticatedResponse {
+  result: boolean;
+}
+
 export async function submit(cellContents: string): Promise<ISubmissionResponse> {
   const endPoint = 'submit'
   const init = {
@@ -22,7 +26,7 @@ export async function submit(cellContents: string): Promise<ISubmissionResponse>
   }
 
   try {
-    return await request<ISubmissionResponse>(endPoint, init)
+    return request<ISubmissionResponse>(endPoint, init)
   } catch (error) {
     console.error(error);
     return { result: false }
@@ -31,6 +35,21 @@ export async function submit(cellContents: string): Promise<ISubmissionResponse>
 
 export async function checkStatus(): Promise<void> {
   return request<void>('status');
+}
+
+export async function isAuthenticated(): Promise<boolean> {
+  const response = await request<IAuthenticatedResponse>('auth/authenticated');
+  return response.result
+}
+
+export function getEndpointUrl(endPoint: string): string {
+  const settings = ServerConnection.makeSettings();
+  return URLExt.join(
+    settings.baseUrl,
+    'ballet',
+    endPoint
+  );
+
 }
 
 /**
@@ -45,15 +64,11 @@ export async function request<T>(
   init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
-  const settings = ServerConnection.makeSettings();
-  const requestUrl = URLExt.join(
-    settings.baseUrl,
-    'ballet',
-    endPoint
-  );
+  const requestUrl = getEndpointUrl(endPoint);
 
   let response: Response;
   try {
+    const settings = ServerConnection.makeSettings();
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
   } catch (error) {
     throw new ServerConnection.NetworkError(error);

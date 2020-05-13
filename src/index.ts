@@ -27,7 +27,7 @@ import {
 } from './widgets';
 
 import {
-  ISubmissionResponse, checkStatus, submit
+  ISubmissionResponse, checkStatus, getEndpointUrl, submit, request, isAuthenticated
 } from './serverextension';
 
 
@@ -54,56 +54,78 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
 
-    let callback = async () => {
-      // load current cell
-      let notebook = panel.content;
-      let activeCell = notebook.activeCell;
-      let contents = activeCell.model.value.text;
-
-      // confirm to proceed
-      const confirmDialog = await showDialog({
-        title: 'Submit feature?',
-        body: new ConfirmWidget(contents)
-      });
-      if (! confirmDialog.button.accept) {
-        return;
-      }
-
-      // post contents to ballet-submit-server
-      console.log(contents);
-      const result: ISubmissionResponse = await submit(contents);
-
-      // try to add a message to cell outputs
-      if (result.result) {
-        showDialog({
-          title: 'Feature submitted successfully',
-          body: new FeatureSubmittedOkayWidget(result.url),
-          buttons: [
-            Dialog.okButton()
-          ]
-        });
-      } else {
-        const message = result.message !== undefined && result.message !== null
-          ? `: ${result.message}.`
-          : '.';
-        showErrorMessage(
-          'Error submitting feature',
-          `Oops - there was a problem submitting your feature${message}`
-        );
-      }
-    };
-
     let button = new ToolbarButton({
       label: 'Submit',
       iconClass: 'fa fa-share ballet-submitButtonIcon',
-      onClick: callback,
-      tooltip: 'Submit current cell to Ballet project'
-    });
+      onClick: async () => {
+        // check if authenticated
+        if (!isAuthenticated()) {
+          showErrorMessage(
+            'Not authenticated',
+            'You\'re not authenticated with GitHub - click the GitHub icon in the toolbar to connect!'
+          );
+          return;
+        }
 
+        // load current cell
+        let notebook = panel.content;
+        let activeCell = notebook.activeCell;
+        let contents = activeCell.model.value.text;
+
+        // confirm to proceed
+        const confirmDialog = await showDialog({
+          title: 'Submit feature?',
+          body: new ConfirmWidget(contents)
+        });
+        if (! confirmDialog.button.accept) {
+          return;
+        }
+
+        // post contents to ballet-submit-server
+        console.log(contents);
+        const result: ISubmissionResponse = await submit(contents);
+
+        // try to add a message to cell outputs
+        if (result.result) {
+          showDialog({
+            title: 'Feature submitted successfully',
+            body: new FeatureSubmittedOkayWidget(result.url),
+            buttons: [
+              Dialog.okButton()
+            ]
+          });
+        } else {
+          const message = result.message !== undefined && result.message !== null
+            ? `: ${result.message}.`
+            : '.';
+          showErrorMessage(
+            'Error submitting feature',
+            `Oops - there was a problem submitting your feature${message}`
+          );
+        }
+      },
+      tooltip: 'Submit current cell to Ballet project',
+    });
     panel.toolbar.addItem('balletSubmitButton', button);
+
+    let githubAuthButton = new ToolbarButton({
+      iconClass: 'fa fa-github ballet-githubAuthButtonIcon',
+      onClick: async () => {
+        if (!isAuthenticated()) {
+          window.open(getEndpointUrl('auth/authorize'), '_blank', 'width=350,height=600');
+          await request<void>('auth/token');
+          if (isAuthenticated()) {
+            githubAuthButton.addClass('ballet-githubAuthButtonIcon-authenticated');
+          }
+        }
+      },
+      tooltip: 'Authenticate with GitHub',
+    });
+    panel.toolbar.addItem('githubAuthButton', githubAuthButton);
 
     return new DisposableDelegate(() => {
       button.dispose();
+      githubAuthButton.dispose();
     });
   }
 }
@@ -118,22 +140,23 @@ async function activate(
   // add button to toolbar
   app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension(settingRegistry));
 
-  // create command
-  const command: string = 'ballet:submit';
-  app.commands.addCommand(command, {
+  // create submit command
+  const submitCommand: string = 'ballet:submit';
+  app.commands.addCommand(submitCommand, {
     label: 'Submit Feature',
     execute: () => {
       console.log('Submit feature executed (TODO)');
     }
   });
-
-  // add command to palette
-  palette.addItem({command, category: 'Ballet'});
+  palette.addItem({command: submitCommand, category: 'Ballet'});
 
   // check status of /ballet endpoints
-  checkStatus()
-    .then(() => console.log('Connected to /ballet endpoints'))
-    .catch(() => console.error('Can\'t connect to /ballet endpoints'));
+  try {
+    await checkStatus();
+    console.log('Connected to /ballet endpoints');
+  } catch {
+    console.error('Can\'t connect to /ballet endpoints');
+  }
 }
 
 /**
