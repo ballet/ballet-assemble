@@ -77,30 +77,42 @@ class AuthorizeHandler(IPythonHandler):
         self.redirect(url, permanent=False)
 
 
-class AuthorizeSuccessHandler(IPythonHandler):
+class TokenHandler(IPythonHandler):
 
     @tornado.web.authenticated
-    def get(self):
-        """callback indicating that we have authenticated"""
+    def post(self):
+        """request token if we have just authenticated"""
         app = BalletApp.instance()
         base = app.oauth_gateway_url
         url = urljoin(base, '/api/v1/access_token')
         data = {
             'state': app.state,
+            'timeout': app.timeout,
         }
-        response = requests.post(url, json=data)
+        response = requests.post(url, json=data, timeout=app.timeout)
         d = response.json()
 
         if response.ok:
             # TODO also store other token info
             token = d['access_token']
-            app.set_token(token)
+            app.set_github_token(token)
             self.finish()
         else:
             reason = d.get('message')
             self.send_error(status_code=400, reason=reason)
 
         app.reset_state()
+
+
+class AuthenticatedHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+        app = BalletApp.instance()
+        self.write({
+            'result': app.is_authenticated(),
+            'message': None,
+        })
 
 
 def setup_handlers(app: NotebookWebApplication, url_path: str):
@@ -114,5 +126,6 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
         (route_pattern(r'config/(.*)'), ConfigItemHandler),
         (route_pattern('submit'), SubmitHandler),
         (route_pattern('auth', 'authorize'), AuthorizeHandler),
-        (route_pattern('auth', 'success'), AuthorizeSuccessHandler),
+        (route_pattern('auth', 'token'), TokenHandler),
+        (route_pattern('auth', 'authenticated'), AuthenticatedHandler),
     ])

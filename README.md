@@ -44,7 +44,7 @@ if it does not exist):
 
     ```python
     c.BalletApp.username = 'github username'
-    c.BalletApp.token = 'github personal access token'
+    c.BalletApp.github_token = 'github personal access token'
     ```
     
     You can optionally also configure the following:

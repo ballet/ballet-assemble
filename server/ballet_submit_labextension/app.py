@@ -23,7 +23,7 @@ from cookiecutter.utils import work_in
 from github import Github
 from notebook.notebookapp import NotebookApp
 from stacklog import stacklog as _stacklog
-from traitlets import Bool, Unicode, default, validate
+from traitlets import Bool, Integer, Unicode, default, validate
 from traitlets.config import SingletonConfigurable
 
 TESTING_URL = 'http://some/testing/url'
@@ -98,12 +98,12 @@ class BalletApp(SingletonConfigurable):
         # fixme: truthy only works on strings as of ballet==0.6.11
         return truthy(getenv('BALLET_DEBUG', default=_default))
 
-    token = Unicode(
+    github_token = Unicode(
         config=True,
-        help='github personal access token'
+        help='github access token'
     )
-    @default('token')
-    def _default_token(self):
+    @default('github_token')
+    def _default_github_token(self):
         return getenv('GITHUB_TOKEN', '')
 
     ballet_yml_path = Unicode(
@@ -122,6 +122,12 @@ class BalletApp(SingletonConfigurable):
         'https://github-oauth-gateway.herokuapp.com/',
         config=True,
         help='url to github-oauth-gateway server',
+    )
+
+    access_token_timeout = Integer(
+        60,
+        config=True,
+        help='timeout to receive access token from server via polling'
     )
 
     # -- end traits --
@@ -148,12 +154,22 @@ class BalletApp(SingletonConfigurable):
     def reset_state(self):
         self._state = None
 
-    def set_token(self, token):
-        self.token = token
+    def set_github_token(self, token):
+        self.github_token = token
+
+    _is_authenticated = False
+
+    def is_authenticated(self):
+        if not self._is_authenticated:
+            with fy.ignore(Exception):
+                _ = self.username
+                self._is_authenticated = True
+
+        return self._is_authenticated
 
     @property
     def github(self):
-        return Github(self.token)
+        return Github(self.github_token)
 
     @property
     def username(self):
@@ -178,7 +194,7 @@ class BalletApp(SingletonConfigurable):
     @property
     def repo_url(self):
         """url of forked repo, including token-based authentication"""
-        return f'https://{self.token}@github.com/{self.username}/{self.reponame}'
+        return f'https://{self.github_token}@github.com/{self.username}/{self.reponame}'
 
     @property
     def project(self):

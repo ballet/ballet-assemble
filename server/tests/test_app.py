@@ -49,3 +49,12 @@ class BalletHandlersTest(BaseTestCase):
         response = self.request('GET', '/ballet/auth/authorize', allow_redirects=False)
 
         assert response.status_code == http.HTTPStatus.FOUND
+
+    def test_auth_authenticated(self):
+        app = BalletApp.instance()
+        app._is_authenticated = True
+
+        response = self.request('GET', '/ballet/auth/authenticated')
+        d = response.json()
+
+        assert 'result' in d and d['result']
