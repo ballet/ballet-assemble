@@ -161,7 +161,7 @@ class BalletApp(SingletonConfigurable):
 
     def is_authenticated(self):
         if not self._is_authenticated:
-            with fy.ignore(Exception):
+            with fy.suppress(Exception):
                 _ = self.username
                 self._is_authenticated = True
 

@@ -62,6 +62,7 @@ install_requires = [
     'pygithub',
     'stacklog',
     'requests',
+    'tenacity',
     'tornado',
 ]
 

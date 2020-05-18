@@ -7,6 +7,7 @@ import tornado
 from notebook.base.handlers import APIHandler, IPythonHandler
 from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
+from tenacity import RetryError, retry, retry_if_result, stop_after_delay, wait_fixed
 
 from .app import BalletApp
 
@@ -84,22 +85,41 @@ class TokenHandler(IPythonHandler):
         """request token if we have just authenticated"""
         app = BalletApp.instance()
         base = app.oauth_gateway_url
+        timeout = app.access_token_timeout
+        state = app.state
         url = urljoin(base, '/api/v1/access_token')
         data = {
-            'state': app.state,
-            'timeout': app.timeout,
+            'state': state,
         }
-        response = requests.post(url, json=data, timeout=app.timeout)
-        d = response.json()
 
-        if response.ok:
-            # TODO also store other token info
-            token = d['access_token']
+        retry_obj = object()
+
+        @retry(
+            wait=wait_fixed(3),
+            retry=retry_if_result(lambda x: x is retry_obj),
+            stop=stop_after_delay(timeout),
+        )
+        def get_token():
+            response = requests.post(url, json=data)
+            d = response.json()
+            if response.ok:
+                # TODO also store other token info
+                return d['access_token']
+            else:
+                reason = d.get('message', '').lower()
+                if 'no authorization code found' in reason:
+                    return
+                else:
+                    raise RuntimeError(reason)
+
+        try:
+            token = get_token()
             app.set_github_token(token)
             self.finish()
-        else:
-            reason = d.get('message')
-            self.send_error(status_code=400, reason=reason)
+        except RetryError:
+            self.send_error(status_code=400, reason='timeout')
+        except RuntimeError as e:
+            self.send_error(status_code=400, reason=str(e))
 
         app.reset_state()
 
