@@ -61,7 +61,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
       iconClass: 'fa fa-share ballet-submitButtonIcon',
       onClick: async () => {
         // check if authenticated
-        if (!isAuthenticated()) {
+        if (! await isAuthenticated()) {
           showErrorMessage(
             'Not authenticated',
             'You\'re not authenticated with GitHub - click the GitHub icon in the toolbar to connect!'
@@ -126,6 +126,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
     panel.toolbar.addItem('githubAuthButton', githubAuthButton);
 
     // ugh
+    // TODO - remove callback when authenticated, assuming that we will never become un-authenticated
     setInterval(async () => {
       $('.ballet-githubAuthButtonIcon').toggleClass(
         'ballet-githubAuthButtonIcon-authenticated',
