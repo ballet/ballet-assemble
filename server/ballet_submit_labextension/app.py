@@ -31,7 +31,7 @@ TESTING_URL = 'http://some/testing/url'
 
 @dataclass
 class Response:
-    result: str
+    result: bool
     url: str = None
     message: str = None
 
@@ -195,6 +195,10 @@ class BalletApp(SingletonConfigurable):
         return f'{github_owner}/{self.reponame}'
 
     @property
+    def upstream_repo(self):
+        return self.github.get_repo(self.upstream_repo_spec)
+
+    @property
     def repo_url(self):
         """url of forked repo, including token-based authentication"""
         return f'https://{self.github_token}@github.com/{self.username}/{self.reponame}'
@@ -222,6 +226,9 @@ class BalletApp(SingletonConfigurable):
         code_content = self.load_request(input_data)
         self.check_code_is_valid(code_content)
 
+        # async
+        self.fork_repo()
+
         with tempfile.TemporaryDirectory() as dirname:
             dirname = str(pathlib.Path(dirname).resolve())
             repo = self.clone_repo(dirname)
@@ -231,7 +238,8 @@ class BalletApp(SingletonConfigurable):
                 changed_files, new_feature_path = self.start_new_feature(dirname, feature_name)
                 self.write_code_content(new_feature_path, code_content)
                 self.commit_changes(repo, changed_files)
-                self.push_to_remote(repo, branch_name)
+                push_result = self.push_to_remote(repo, branch_name)  # noqa F841
+                # TODO if push failed, likely because fork does not yet exist, then try again
                 return self.create_pull_request(feature_name, branch_name)
 
     @stacklog('DEBUG', 'Loading request')
@@ -246,6 +254,14 @@ class BalletApp(SingletonConfigurable):
     def check_code_is_valid(self, code_content: str) -> None:
         if not is_valid_python(code_content):
             raise ValueError('Submitted code is not valid Python code')
+
+    @stacklog('INFO', 'Forking upstream repo')
+    def fork_repo(self) -> None:
+        if not self.debug:
+            return self.upstream_repo.create_fork()
+        else:
+            self.log.debug('Didn\'t actually fork repo due to debug')
+            return None
 
     @stacklog('INFO', 'Cloning repo')
     def clone_repo(self, dirname: str) -> git.Repo:
@@ -295,10 +311,10 @@ class BalletApp(SingletonConfigurable):
         repo.index.commit('Add new feature')
 
     @stacklog('INFO', 'Pushing to remote')
-    def push_to_remote(self, repo, branch_name):
+    def push_to_remote(self, repo, branch_name) -> List[git.remote.PushInfo]:
         refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
         if not self.debug:
-            repo.remote().push(refspec=refspec)
+            return repo.remote().push(refspec=refspec)
         else:
             self.log.debug('Didn\'t actually push to remote due to debug')
 
