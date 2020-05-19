@@ -1,4 +1,3 @@
-import threading
 from functools import partial
 from urllib.parse import urlencode, urljoin
 
@@ -7,7 +6,10 @@ import tornado
 from notebook.base.handlers import APIHandler, IPythonHandler
 from notebook.notebookapp import NotebookWebApplication
 from notebook.utils import url_path_join
-from tenacity import RetryError, retry, retry_if_result, stop_after_delay, wait_fixed
+from tenacity import (
+    RetryError, retry, retry_if_exception_message, retry_if_exception_type, stop_after_delay,
+    wait_fixed)
+from tornado.httpclient import AsyncHTTPClient
 
 from .app import BalletApp
 
@@ -60,11 +62,10 @@ class AuthorizeHandler(IPythonHandler):
     def get(self):
         app = BalletApp.instance()
 
-        # try to wake server - don't care about response
-        threading.Thread(
-            target=requests.get,
-            args=(urljoin(app.oauth_gateway_url, '/status'),),
-        ).start()
+        # wake server async
+        http_client = AsyncHTTPClient()
+        url = urljoin(app.oauth_gateway_url, '/status')
+        http_client.fetch(url)
 
         # do oauth flow
         base = GITHUB_OAUTH_URL
@@ -80,40 +81,37 @@ class AuthorizeHandler(IPythonHandler):
 
 class TokenHandler(IPythonHandler):
 
+    @retry(
+        wait=wait_fixed(3),
+        retry=(
+            retry_if_exception_type(RuntimeError) &
+            retry_if_exception_message(match=r'[Nn]o authorization code found.*')
+        ),
+        stop=stop_after_delay(BalletApp.instance().access_token_timeout)
+    )
+    @tornado.gen.coroutine
+    def get_token(self, url, data):
+        response = requests.post(url, json=data)
+        d = response.json()
+        if response.ok:
+            # TODO also store other token info
+            raise tornado.gen.Return(d['access_token'])
+        else:
+            reason = d.get('message', '').lower()
+            raise RuntimeError(reason)
+
     @tornado.web.authenticated
+    @tornado.gen.coroutine
     def post(self):
         """request token if we have just authenticated"""
         app = BalletApp.instance()
         base = app.oauth_gateway_url
-        timeout = app.access_token_timeout
         state = app.state
         url = urljoin(base, '/api/v1/access_token')
-        data = {
-            'state': state,
-        }
-
-        retry_obj = object()
-
-        @retry(
-            wait=wait_fixed(3),
-            retry=retry_if_result(lambda x: x is retry_obj),
-            stop=stop_after_delay(timeout),
-        )
-        def get_token():
-            response = requests.post(url, json=data)
-            d = response.json()
-            if response.ok:
-                # TODO also store other token info
-                return d['access_token']
-            else:
-                reason = d.get('message', '').lower()
-                if 'no authorization code found' in reason:
-                    return
-                else:
-                    raise RuntimeError(reason)
+        data = {'state': state}
 
         try:
-            token = get_token()
+            token = yield self.get_token(url, data)
             app.set_github_token(token)
             self.finish()
         except RetryError:

@@ -92,6 +92,7 @@ class BalletApp(SingletonConfigurable):
         config=True,
         help='enable debug mode (no changes made on GitHub)',
     )
+
     @default('debug')
     def _default_debug(self):
         _default = 'False'
@@ -102,6 +103,7 @@ class BalletApp(SingletonConfigurable):
         config=True,
         help='github access token'
     )
+
     @default('github_token')
     def _default_github_token(self):
         return getenv('GITHUB_TOKEN', '')
@@ -111,6 +113,7 @@ class BalletApp(SingletonConfigurable):
         config=True,
         help='path to ballet.yml file of Ballet project (if Lab is not run from project directory)'
     )
+
     @validate('ballet_yml_path')
     def _validate_ballet_yml_path(self, proposal):
         if proposal:
