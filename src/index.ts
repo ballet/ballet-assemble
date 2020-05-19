@@ -30,6 +30,8 @@ import {
   ISubmissionResponse, checkStatus, getEndpointUrl, submit, request, isAuthenticated
 } from './serverextension';
 
+import $ from 'jquery';
+
 
 const EXTENSION_NAME = 'ballet-submit-labextension';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
@@ -111,17 +113,24 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
     let githubAuthButton = new ToolbarButton({
       iconClass: 'fa fa-github ballet-githubAuthButtonIcon',
       onClick: async () => {
-        if (!isAuthenticated()) {
+        if (! await isAuthenticated()) {
           window.open(getEndpointUrl('auth/authorize'), '_blank', 'width=350,height=600');
-          await request<void>('auth/token');
-          if (isAuthenticated()) {
-            githubAuthButton.addClass('ballet-githubAuthButtonIcon-authenticated');
-          }
+          // async
+          request<void>('auth/token', {
+            method: 'POST',
+          });
         }
       },
       tooltip: 'Authenticate with GitHub',
     });
     panel.toolbar.addItem('githubAuthButton', githubAuthButton);
+
+    // ugh
+    setInterval(async () => {
+      $('.ballet-githubAuthButtonIcon').toggleClass(
+        'ballet-githubAuthButtonIcon-authenticated',
+        await isAuthenticated());
+    }, 5*1000);
 
     return new DisposableDelegate(() => {
       button.dispose();
