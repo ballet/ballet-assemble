@@ -1,0 +1,82 @@
+name: Run CI
+
+on:
+  push:
+    branches: master
+  pull_request:
+    branches: '*'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+       node-version: '10.x'
+    - name: Install Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+        architecture: 'x64'
+    - name: Install, build, and test the extension
+      run: |
+        /usr/bin/env make test-install
+
+  test-python-lib:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Install Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+        architecture: 'x64'
+    - name: Install
+      run: |
+        /usr/bin/env make install-test
+    - name: Test python library
+      run: |
+        /usr/bin/env make test-python-lib
+
+  test-js-lib:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Test js library
+      run: |
+        /usr/bin/env make test-js-lib
+
+  lint-python-lib:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Install Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+        architecture: 'x64'
+    - name: Install library
+      run: |
+        /usr/bin/env make install-develop
+    - name: Lint
+      run: |
+        /usr/bin/env make lint
