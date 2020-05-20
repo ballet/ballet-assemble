@@ -30,7 +30,7 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 .PHONY: clean
-clean: clean-build clean-pyc clean-js ## remove build, Python, and js artifacts
+clean: clean-build clean-py clean-js ## remove build, Python, and js artifacts
 
 .PHONY: clean-build
 clean-build: ## remove build artifacts
@@ -40,12 +40,13 @@ clean-build: ## remove build artifacts
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
 
-.PHONY: clean-pyc
-clean-pyc: ## remove Python file artifacts
+.PHONY: clean-py
+clean-py: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
+	find . -name '.pytest_cache' -exec rm -fr {} +
 
 .PHONY: clean-js
 clean-js: ## remove js file artifacts
@@ -71,9 +72,17 @@ test-js-lib: ## run js tests
 	true  # TODO
 
 .PHONY: lint
-lint: ## check style with flake8 and isort
+lint: lint-python lint-js  ## lint
+
+
+.PHONY: lint-python
+lint-python: ## check python style with flake8 and isort
 	flake8 server/ballet_submit_labextension
 	isort -c --recursive server/ballet_submit_labextension
+
+.PHONY: lint-js
+lint-js: ## check js style with tslint and prettier
+	jlpm run lint:check
 
 .PHONY: release
 release: dist ## package and upload a release
@@ -86,8 +95,7 @@ test-release: dist ## package and upload a release on TestPyPI
 
 .PHONY: dist
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python setup.py sdist bdist_wheel
 	ls -l dist
 
 .PHONY: install
