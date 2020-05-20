@@ -29,9 +29,63 @@ jupyter lab build
 Note: You will need NodeJS to install the extension; the installation process
 will complain if it is not found.
 
+## Authenticate with GitHub
+
+The extension provides an in-lab experience for authenticating
+with GitHub. When you open a notebook, you should see the GitHub icon to the
+right on the Notebook toolbar. The icon should be grey at first, indicating
+you are not authenticated. Click the icon to open a login window, in which
+you can enter your GitHub username and password. These will be exchanged by
+the extension for an OAuth token and will be used to propose changes to the
+upstream Ballet project on your behalf (if you attempt to submit features).
+
+Alternately, you can provide a personal access token directly using the
+configuration approaches below.
+
 ## Configure
 
 The extension ties into the same configuration system as Jupyter [Lab] itself.
+You can configure the extension with command line arguments or via the
+config file, just like you configure Jupyter Notebook or Jupyter Lab.
+
+### All configuration options
+    
+The following configuration options are available:
+
+```
+$ python -c 'from ballet_submit_labextension.app import print_help;print_help()'
+
+BalletApp options
+-----------------
+--BalletApp.access_token_timeout=<Int>
+    Default: 60
+    timeout to receive access token from server via polling
+--BalletApp.ballet_yml_path=<Unicode>
+    Default: ''
+    path to ballet.yml file of Ballet project (if Lab is not run from project
+    directory)
+--BalletApp.debug=<Bool>
+    Default: False
+    enable debug mode (no changes made on GitHub), will read from $BALLET_DEBUG
+    if present
+--BalletApp.github_token=<Unicode>
+    Default: ''
+    github access token, will read from $GITHUB_TOKEN if present
+--BalletApp.oauth_gateway_url=<Unicode>
+    Default: 'https://github-oauth-gateway.herokuapp.com/'
+    url to github-oauth-gateway server
+```
+
+### Command line arguments
+
+Invoke Jupyter Lab with command line arguments providing config to the ballet
+extension, for example:
+
+```
+jupyter lab --BalletApp.debug=True
+```
+
+### Config file
 
 1. Determine the path to your jupyter config file (you may have to create it 
 if it does not exist):
@@ -40,27 +94,12 @@ if it does not exist):
     touch "$(jupyter --config-dir)/jupyter_notebook_config.py"
     ```
 
-2. Append the following config to the end of the file:
+2. Append desired config to the end of the file, for example:
 
     ```python
-    c.BalletApp.username = 'github username'
-    c.BalletApp.github_token = 'github personal access token'
+    c.BalletApp.debug = True
     ```
-    
-    You can optionally also configure the following:
-    
-    ```python
-    c.BalletApp.useremail = 'email address to associate with git commit messages'
-    c.BalletApp.debug = 'enable debug mode (no changes made on GitHub)'
-    c.BalletApp.ballet_yml_path = 'path to ballet.yml file of Ballet project (if Lab is not run from project directory)'
-    ```
-    
-To see more details on available configuration options, run
-
-```bash
-python -c 'from ballet_submit_labextension.submit import print_help;print_help()'
-```
-
+   
 ## Troubleshoot
 
 If you are see the frontend extension but it is not working, check

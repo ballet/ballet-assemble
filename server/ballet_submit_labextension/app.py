@@ -90,7 +90,8 @@ class BalletApp(SingletonConfigurable):
 
     debug = Bool(
         config=True,
-        help='enable debug mode (no changes made on GitHub)',
+        help='enable debug mode (no changes made on GitHub), will read from $BALLET_DEBUG if '
+             'present',
     )
 
     @default('debug')
@@ -101,7 +102,7 @@ class BalletApp(SingletonConfigurable):
 
     github_token = Unicode(
         config=True,
-        help='github access token'
+        help='github access token, will read from $GITHUB_TOKEN if present'
     )
 
     @default('github_token')
