@@ -38,10 +38,10 @@
     "watch": "tsc -w",
     "lint": "jlpm run tslint && jlpm run prettier",
     "prettier": "prettier --write \"**/*{.ts,.tsx,.css,.json}\"",
-    "tslint": "tslint --fix -c tslint.json '**/*{.ts,.tsx}'",
+    "tslint": "tslint --fix -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
     "lint:check": "jlpm run tslint:check && jlpm run prettier:check",
     "prettier:check": "prettier --list-different \"**/*{.ts,.tsx,.css,.json}\"",
-    "tslint:check": "tslint -c tslint.json '**/*{.ts,.tsx}'"
+    "tslint:check": "tslint -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'"
   },
   "dependencies": {
     "@jupyterlab/application": "^2.0.1",
