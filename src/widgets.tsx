@@ -13,11 +13,15 @@ export class ConfirmWidget extends ReactWidget {
   render() {
     return (
       <div className="ballet-featureSubmittedConfirm">
-        <p> The following feature would be submitted to the upstream Ballet project: </p>
+        <p>
+          {' '}
+          The following feature would be submitted to the upstream Ballet
+          project:{' '}
+        </p>
         <div>
-          <pre><code>
-          {this.code}
-          </code></pre>
+          <pre>
+            <code>{this.code}</code>
+          </pre>
         </div>
       </div>
     );
@@ -37,9 +41,16 @@ export class FeatureSubmittedOkayWidget extends ReactWidget {
     return (
       <div className="ballet-featureSubmittedOkay">
         <p> Your feature was submitted! </p>
-        <br/>
-        <p> The associated pull request is visible at <a  href={this.url} target="_blank">{this.url}</a>. </p>
-        <br/>
+        <br />
+        <p>
+          {' '}
+          The associated pull request is visible at{' '}
+          <a href={this.url} target="_blank">
+            {this.url}
+          </a>
+          .{' '}
+        </p>
+        <br />
         <p> Please do not submit this same feature more than once. </p>
       </div>
     );

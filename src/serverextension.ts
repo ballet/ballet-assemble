@@ -16,20 +16,22 @@ export interface IAuthenticatedResponse {
   result: boolean;
 }
 
-export async function submit(cellContents: string): Promise<ISubmissionResponse> {
-  const endPoint = 'submit'
+export async function submit(
+  cellContents: string
+): Promise<ISubmissionResponse> {
+  const endPoint = 'submit';
   const init = {
     method: 'POST',
     body: JSON.stringify({
       codeContent: cellContents
     })
-  }
+  };
 
   try {
-    return request<ISubmissionResponse>(endPoint, init)
+    return request<ISubmissionResponse>(endPoint, init);
   } catch (error) {
     console.error(error);
-    return { result: false }
+    return { result: false };
   }
 }
 
@@ -39,17 +41,12 @@ export async function checkStatus(): Promise<void> {
 
 export async function isAuthenticated(): Promise<boolean> {
   const response = await request<IAuthenticatedResponse>('auth/authenticated');
-  return response.result
+  return response.result;
 }
 
 export function getEndpointUrl(endPoint: string): string {
   const settings = ServerConnection.makeSettings();
-  return URLExt.join(
-    settings.baseUrl,
-    'ballet',
-    endPoint
-  );
-
+  return URLExt.join(settings.baseUrl, 'ballet', endPoint);
 }
 
 /**

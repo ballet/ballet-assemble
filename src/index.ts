@@ -1,37 +1,36 @@
 import {
-  Dialog, showDialog, showErrorMessage, ToolbarButton, ICommandPalette
+  Dialog,
+  showDialog,
+  showErrorMessage,
+  ToolbarButton,
+  ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {
-  IDisposable, DisposableDelegate
-} from '@lumino/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import {
-  JupyterFrontEnd, JupyterFrontEndPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { ConfirmWidget, FeatureSubmittedOkayWidget } from './widgets';
 
 import {
-  NotebookPanel, INotebookModel
-} from '@jupyterlab/notebook';
-
-import {
-  ISettingRegistry
-} from '@jupyterlab/settingregistry';
-
-import {
-  ConfirmWidget, FeatureSubmittedOkayWidget
-} from './widgets';
-
-import {
-  ISubmissionResponse, checkStatus, getEndpointUrl, submit, request, isAuthenticated
+  ISubmissionResponse,
+  checkStatus,
+  getEndpointUrl,
+  submit,
+  request,
+  isAuthenticated
 } from './serverextension';
 
 import $ from 'jquery';
-
 
 const EXTENSION_NAME = 'ballet-submit-labextension';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
@@ -39,8 +38,8 @@ const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
  */
-export
-class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+export class BalletSubmitButtonExtension
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   settingRegistry: ISettingRegistry;
 
   constructor(settingRegistry: ISettingRegistry) {
@@ -48,23 +47,26 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
   }
 
   async loadSetting(settingName: string): Promise<string> {
-    return (await this.settingRegistry.get(PLUGIN_ID, settingName)).composite as string;
+    return (await this.settingRegistry.get(PLUGIN_ID, settingName))
+      .composite as string;
   }
 
   /**
    * Create a new extension object.
    */
-  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
-
+  createNew(
+    panel: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): IDisposable {
     let button = new ToolbarButton({
       label: 'Submit',
       iconClass: 'fa fa-share ballet-submitButtonIcon',
       onClick: async () => {
         // check if authenticated
-        if (! await isAuthenticated()) {
-          showErrorMessage(
+        if (!(await isAuthenticated())) {
+          void showErrorMessage(
             'Not authenticated',
-            'You\'re not authenticated with GitHub - click the GitHub icon in the toolbar to connect!'
+            "You're not authenticated with GitHub - click the GitHub icon in the toolbar to connect!"
           );
           return;
         }
@@ -79,7 +81,7 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
           title: 'Submit feature?',
           body: new ConfirmWidget(contents)
         });
-        if (! confirmDialog.button.accept) {
+        if (!confirmDialog.button.accept) {
           return;
         }
 
@@ -89,47 +91,48 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
 
         // try to add a message to cell outputs
         if (result.result) {
-          showDialog({
+          void showDialog({
             title: 'Feature submitted successfully',
             body: new FeatureSubmittedOkayWidget(result.url),
-            buttons: [
-              Dialog.okButton()
-            ]
+            buttons: [Dialog.okButton()]
           });
         } else {
-          const message = result.message !== undefined && result.message !== null
-            ? `: ${result.message}.`
-            : '.';
-          showErrorMessage(
+          const message =
+            result.message !== undefined && result.message !== null
+              ? `: ${result.message}.`
+              : '.';
+          void showErrorMessage(
             'Error submitting feature',
             `Oops - there was a problem submitting your feature${message}`
           );
         }
       },
-      tooltip: 'Submit current cell to Ballet project',
+      tooltip: 'Submit current cell to Ballet project'
     });
     panel.toolbar.addItem('balletSubmitButton', button);
 
     let githubAuthButton = new ToolbarButton({
       iconClass: 'fa fa-github ballet-githubAuthButtonIcon',
       onClick: async () => {
-        if (! await isAuthenticated()) {
-          window.open(getEndpointUrl('auth/authorize'), '_blank', 'width=350,height=600');
+        if (!(await isAuthenticated())) {
+          window.open(
+            getEndpointUrl('auth/authorize'),
+            '_blank',
+            'width=350,height=600'
+          );
           // async
-          request<void>('auth/token', {
-            method: 'POST',
+          void request<void>('auth/token', {
+            method: 'POST'
           });
         } else {
-          showDialog({
+          void showDialog({
             title: 'Already authenticated',
             body: 'You have successfully authenticated with GitHub.',
-            buttons: [
-              Dialog.okButton()
-            ]
+            buttons: [Dialog.okButton()]
           });
         }
       },
-      tooltip: 'Authenticate with GitHub',
+      tooltip: 'Authenticate with GitHub'
     });
     panel.toolbar.addItem('githubAuthButton', githubAuthButton);
 
@@ -138,8 +141,9 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
     setInterval(async () => {
       $('.ballet-githubAuthButtonIcon').toggleClass(
         'ballet-githubAuthButtonIcon-authenticated',
-        await isAuthenticated());
-    }, 5*1000);
+        await isAuthenticated()
+      );
+    }, 5 * 1000);
 
     return new DisposableDelegate(() => {
       button.dispose();
@@ -156,7 +160,10 @@ async function activate(
   console.log(`JupyterLab extension ${EXTENSION_NAME} is activated!`);
 
   // add button to toolbar
-  app.docRegistry.addWidgetExtension('Notebook', new BalletSubmitButtonExtension(settingRegistry));
+  app.docRegistry.addWidgetExtension(
+    'Notebook',
+    new BalletSubmitButtonExtension(settingRegistry)
+  );
 
   // create submit command
   const submitCommand: string = 'ballet:submit';
@@ -166,14 +173,14 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({command: submitCommand, category: 'Ballet'});
+  palette.addItem({ command: submitCommand, category: 'Ballet' });
 
   // check status of /ballet endpoints
   try {
     await checkStatus();
     console.log('Connected to /ballet endpoints');
   } catch {
-    console.error('Can\'t connect to /ballet endpoints');
+    console.error("Can't connect to /ballet endpoints");
   }
 }
 
