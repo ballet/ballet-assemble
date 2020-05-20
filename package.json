@@ -34,11 +34,14 @@
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "clean:labextension": "rimraf server/ballet_submit_labextension/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
-    "lint": "jlpm run tslint && jlpm run prettier",
     "prepare": "jlpm run clean && jlpm run build",
+    "watch": "tsc -w",
+    "lint": "jlpm run tslint && jlpm run prettier",
     "prettier": "prettier --write \"**/*{.ts,.tsx,.css,.json}\"",
     "tslint": "tslint --fix -c tslint.json '**/*{.ts,.tsx}'",
-    "watch": "tsc -w"
+    "lint:check": "jlpm run tslint:check && jlpm run prettier:check",
+    "prettier:check": "prettier --list-different \"**/*{.ts,.tsx,.css,.json}\"",
+    "tslint:check": "tslint -c tslint.json '**/*{.ts,.tsx}'"
   },
   "dependencies": {
     "@jupyterlab/application": "^2.0.1",
