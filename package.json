@@ -36,11 +36,9 @@
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "prepare": "jlpm run clean && jlpm run build",
     "watch": "tsc -w",
-    "lint": "jlpm run tslint && jlpm run prettier",
-    "prettier": "prettier --write \"**/*{.ts,.tsx,.css,.json}\"",
+    "lint": "jlpm run tslint",
     "tslint": "tslint --fix -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
-    "lint:check": "jlpm run tslint:check && jlpm run prettier:check",
-    "prettier:check": "prettier --list-different \"**/*{.ts,.tsx,.css,.json}\"",
+    "lint:check": "jlpm run tslint:check",
     "tslint:check": "tslint -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'"
   },
   "dependencies": {

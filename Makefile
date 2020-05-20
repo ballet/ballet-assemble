@@ -81,7 +81,7 @@ lint-python: ## check python style with flake8 and isort
 	isort -c --recursive server/ballet_submit_labextension
 
 .PHONY: lint-js
-lint-js: ## check js style with tslint and prettier
+lint-js: ## check js style with tslint
 	jlpm run lint:check
 
 .PHONY: release
