@@ -119,6 +119,14 @@ class BalletSubmitButtonExtension implements DocumentRegistry.IWidgetExtension<N
           request<void>('auth/token', {
             method: 'POST',
           });
+        } else {
+          showDialog({
+            title: 'Already authenticated',
+            body: 'You have successfully authenticated with GitHub.',
+            buttons: [
+              Dialog.okButton()
+            ]
+          });
         }
       },
       tooltip: 'Authenticate with GitHub',
