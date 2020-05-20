@@ -1,4 +1,4 @@
-![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Build/badge.svg)
+[![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Build/badge.svg)](https://github.com/HDI-Project/ballet-submit-labextension/actions)
 [![PyPI Shield](https://img.shields.io/pypi/v/ballet-submit-labextension.svg)](https://pypi.org/project/ballet-submit-labextension)
 [![npm version](https://img.shields.io/npm/v/ballet-submit-labextension)](https://www.npmjs.com/package/ballet-submit-labextension)
 
