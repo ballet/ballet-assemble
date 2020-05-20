@@ -99,17 +99,17 @@ dist: clean ## builds source and wheel package
 	ls -l dist
 
 .PHONY: install
-install: clean-build clean-pyc ## install the package to the active Python's site-packages
+install: clean-build clean-py ## install the package to the active Python's site-packages
 	pip install .
 	jupyter lab build
 
 .PHONY: install-test
-install-test: clean-build clean-pyc ## install the package and test dependencies
+install-test: clean-build clean-py ## install the package and test dependencies
 	pip  install .[test]
 	jupyter lab build
 
 .PHONY: install-develop
-install-develop: clean-build clean-pyc ## install the package in editable mode and dependencies for development
+install-develop: clean-build clean-py ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
 	jupyter serverextension enable --py ballet_submit_labextension
 	jlpm
