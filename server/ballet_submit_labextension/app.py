@@ -211,7 +211,7 @@ class BalletApp(SingletonConfigurable):
         if self.ballet_yml_path:
             return Project.from_path(self.ballet_yml_path)
 
-        path = NotebookApp.notebook_dir
+        path = NotebookApp.instance().notebook_dir
         with fy.suppress(Exception):
             return Project.from_path(path)
 
