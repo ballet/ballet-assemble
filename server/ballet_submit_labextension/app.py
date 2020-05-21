@@ -253,6 +253,9 @@ class BalletApp(SingletonConfigurable):
 
     @stacklog('INFO', 'Checking for valid code')
     def check_code_is_valid(self, code_content: str) -> None:
+        if not code_content.strip():
+            raise ValueError('No code was submitted -- did you select the correct cell?')
+
         if not is_valid_python(code_content):
             raise ValueError('Submitted code is not valid Python code')
 

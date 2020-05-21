@@ -103,3 +103,14 @@ class BalletHandlersTest(BaseTestCase):
         d = response.json()
 
         assert d['result'] == result and d['url'] == url
+
+    def test_submit_empty_cell(self):
+        response = self.request('POST', '/ballet/submit', json={
+            'codeContent': '',
+        })
+        d = response.json()
+
+        assert d['result'] == False
+        assert d['message'] is not None
+
+
