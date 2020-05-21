@@ -166,3 +166,10 @@ jupyter lab --watch
 pip uninstall ballet-submit-labextension
 jupyter labextension uninstall ballet-submit-labextension
 ```
+
+### Release process
+
+```
+bumpversion <part>
+make release
+```
