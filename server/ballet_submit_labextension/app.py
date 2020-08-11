@@ -1,13 +1,17 @@
 import base64
+import datetime
+import json
+import hashlib
 import logging
 import os
 import pathlib
+import socket
 import tempfile
 import uuid
 from dataclasses import asdict, dataclass
 from os import getenv
 from textwrap import dedent
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from urllib.parse import urljoin
 
 import ballet.templating
@@ -22,6 +26,7 @@ from ballet.util.git import set_config_variables
 from cookiecutter.utils import work_in
 from github import Github
 from notebook.notebookapp import NotebookApp
+from requests import RequestException
 from stacklog import stacklog as _stacklog
 from traitlets import Bool, Integer, Unicode, default, validate
 from traitlets.config import SingletonConfigurable
@@ -82,6 +87,19 @@ def handlefailures(call):
     except Exception as e:
         message = str(e)
         return Response(result=False, message=message)
+
+
+def iftelenabled(method):
+    def wrapped(self, *args, **kwargs):
+        if not self.tel:
+            return
+        else:
+            return method(self, *args, **kwargs)
+    return wrapped
+
+
+def sha1(s):
+    return hashlib.sha1(s.encode('utf-8')).hexdigest()
 
 
 class BalletApp(SingletonConfigurable):
@@ -315,12 +333,15 @@ class BalletApp(SingletonConfigurable):
         repo.index.commit('Add new feature')
 
     @stacklog('INFO', 'Pushing to remote')
-    def push_to_remote(self, repo, branch_name) -> List[git.remote.PushInfo]:
+    def push_to_remote(
+        self, repo, branch_name
+    ) -> Optional[List[git.remote.PushInfo]]:
         refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
         if not self.debug:
             return repo.remote().push(refspec=refspec)
         else:
             self.log.debug('Didn\'t actually push to remote due to debug')
+            return None
 
     @stacklog('INFO', 'Creating pull request')
     def create_pull_request(self, feature_name, branch_name):
@@ -353,6 +374,81 @@ class BalletApp(SingletonConfigurable):
             url = TESTING_URL
 
         return Response(result=True, url=url)
+
+    # begin tel stuff
+
+    tel = Bool(
+        False,
+        config=True,
+        help='enable Ballet tel for experiments',
+    )
+
+    telserver = Unicode(
+        'http://localhost',
+        config=True,
+        help='url to tel server'
+    )
+
+    _televents = []
+    _tel_opted_in = 'unknown'
+    _telgh_value = None
+    _tel_already_added_launch = False
+
+    @fy.cached_property
+    def _telhost(self):
+        return sha1(socket.gethostname())
+
+    @property
+    def _telgh(self):
+        if self._telgh_value is None:
+            with fy.suppress(Exception):
+                self._telgh_value = sha1(self.username)
+
+        return self._telgh_value
+
+    @fy.ignore(RequestException)
+    @iftelenabled
+    def tel_post(self):
+        if not self.tel_opted_in():
+            return
+
+        response = requests.post(
+            self.telserver + '/events', json=self._televents)
+        if response.ok:
+            self._televents.clear()
+
+    @fy.ignore(RequestException)
+    @iftelenabled
+    def tel_opted_in(self):
+        if self._tel_opted_in == 'unknown' and self._telgh is not None:
+            response = requests.get(
+                self.telserver + '/optedin', params={'id': self._telgh})
+            if response.ok:
+                if 'yes' in response.text:
+                    self._tel_opted_in = 'yes'
+                elif 'no' in response.text:
+                    self._tel_opted_in = 'no'
+        return self._tel_opted_in == 'yes'
+
+    @iftelenabled
+    def tel_add(self, name, details):
+        if name == 'binderlaunched':
+            if self._tel_already_added_launch:
+                return
+            else:
+                self._tel_already_added_launch = True
+
+        event = {
+            'id': str(uuid.uuid4()),
+            'host': self._telhost,
+            'gh': self._telgh,
+            'name': name,
+            'dt': datetime.datetime.utcnow().isoformat(),
+            'details': json.dumps(details),
+        }
+        self._televents.append(event)
+        self.log.info(f'added event {event["name"]} with id {event["id"]}')
+        self.tel_post()
 
 
 def print_help():

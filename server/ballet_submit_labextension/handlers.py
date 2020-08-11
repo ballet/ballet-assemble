@@ -21,6 +21,9 @@ class StatusHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
         self.write({'status': 'OK'})
+        app = BalletApp.instance()
+        app.tel_add('binderlaunched', {})
+        self.log.info('in status handler')
 
 
 class ConfigHandler(APIHandler):
@@ -53,6 +56,7 @@ class SubmitHandler(APIHandler):
         input_data = self.get_json_body()
         app = BalletApp.instance()
         result = app.create_pull_request_for_code_content(input_data)
+        app.tel_add('submit', result)
         self.write(result)
 
 
@@ -133,6 +137,17 @@ class AuthenticatedHandler(APIHandler):
         })
 
 
+class TelHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def post(self):
+        app = BalletApp.instance()
+        body = self.get_json_body()
+        name = body.get('name')
+        details = body.get('details', {})
+        app.tel_add(name, details)
+
+
 def setup_handlers(app: NotebookWebApplication, url_path: str):
     host_pattern = '.*$'
     base_url = app.settings['base_url']
@@ -146,4 +161,5 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
         (route_pattern('auth', 'authorize'), AuthorizeHandler),
         (route_pattern('auth', 'token'), TokenHandler),
         (route_pattern('auth', 'authenticated'), AuthenticatedHandler),
+        (route_pattern('tel'), TelHandler),
     ])
