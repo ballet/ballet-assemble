@@ -16,8 +16,8 @@ for the frontend extension.
 
 ## Install
 
-Installation can be done completely using `pip`, which installs both the 
-server and the frontend extensions. The frontend extension only can be 
+Installation can be done completely using `pip`, which installs both the
+server and the frontend extensions. The frontend extension only can be
 installed using `jupyter labextension install` but will not function properly
 without the corresponding server extension.
 
@@ -39,6 +39,8 @@ you can enter your GitHub username and password. These will be exchanged by
 the extension for an OAuth token and will be used to propose changes to the
 upstream Ballet project on your behalf (if you attempt to submit features).
 
+![Authenticate with GitHub](docs/_static/auth_with_github.gif)
+
 Alternately, you can provide a personal access token directly using the
 configuration approaches below.
 
@@ -49,7 +51,7 @@ You can configure the extension with command line arguments or via the
 config file, just like you configure Jupyter Notebook or Jupyter Lab.
 
 ### All configuration options
-    
+
 The following configuration options are available:
 
 ```
@@ -87,7 +89,7 @@ jupyter lab --BalletApp.debug=True
 
 ### Config file
 
-1. Determine the path to your jupyter config file (you may have to create it 
+1. Determine the path to your jupyter config file (you may have to create it
 if it does not exist):
 
     ```bash
@@ -99,7 +101,7 @@ if it does not exist):
     ```python
     c.BalletApp.debug = True
     ```
-   
+
 ## Troubleshoot
 
 If you are see the frontend extension but it is not working, check
