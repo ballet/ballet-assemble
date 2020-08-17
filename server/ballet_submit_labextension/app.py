@@ -7,6 +7,7 @@ import os
 import pathlib
 import socket
 import tempfile
+import traceback
 import uuid
 from dataclasses import asdict, dataclass
 from os import getenv
@@ -39,6 +40,7 @@ class Response:
     result: bool
     url: str = None
     message: str = None
+    tb: str = None
 
 
 @dataclass
@@ -86,7 +88,8 @@ def handlefailures(call):
         return call()
     except Exception as e:
         message = str(e)
-        return Response(result=False, message=message)
+        tb = ''.join(traceback.format_tb(e.__traceback__))
+        return Response(result=False, message=message, tb=tb)
 
 
 def iftelenabled(method):

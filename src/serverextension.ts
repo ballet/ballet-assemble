@@ -10,6 +10,7 @@ export interface ISubmissionResponse {
   result: boolean;
   url?: string;
   message?: string;
+  tb?: string;
 }
 
 export interface IAuthenticatedResponse {
