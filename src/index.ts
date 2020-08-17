@@ -105,6 +105,7 @@ export class BalletSubmitButtonExtension
             'Error submitting feature',
             `Oops - there was a problem submitting your feature${message}`
           );
+          console.error(result)
         }
       },
       tooltip: 'Submit current cell to Ballet project'
