@@ -88,7 +88,7 @@ development_requirements = [
 
 setup_args = dict(
     name='ballet-submit-labextension',
-    version='0.7.1',
+    version='0.7.2',
     url='https://github.com/HDI-Project/ballet-submit-labextension',
     author='Micah Smith',
     description='Submit ballet modules from within JupyterLab',
