@@ -56,7 +56,8 @@ class SubmitHandler(APIHandler):
         input_data = self.get_json_body()
         app = BalletApp.instance()
         result = app.create_pull_request_for_code_content(input_data)
-        app.tel_add('submit', result)
+        details = {**result, **input_data}
+        app.tel_add('submit', details)
         self.write(result)
 
 
