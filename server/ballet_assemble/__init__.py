@@ -15,7 +15,7 @@ EXTENSION_URL_PATH = 'assemble'
 
 def _jupyter_server_extension_paths():
     return [{
-        'module': 'assemble'
+        'module': 'ballet_assemble'
     }]
 
 
