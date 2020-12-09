@@ -20,7 +20,7 @@ jstargets = [
 ]
 
 package_data_spec = {
-    'ballet_submit_labextension': [
+    'ballet_assemble': [
         '*'
     ]
 }
@@ -28,7 +28,7 @@ package_data_spec = {
 data_files_spec = [
     (
         'share/jupyter/lab/extensions',
-        os.path.join(HERE, 'server', 'ballet_submit_labextension', 'labextension'),
+        os.path.join(HERE, 'server', 'ballet_assemble', 'labextension'),
         '*.tgz',
     ),
     (
@@ -87,17 +87,17 @@ development_requirements = [
 ]
 
 setup_args = dict(
-    name='ballet-submit-labextension',
+    name='ballet-assemble',
     version='0.6.2',
-    url='https://github.com/HDI-Project/ballet-submit-labextension',
+    url='https://github.com/HDI-Project/ballet-assemble',
     author='Micah Smith',
     description='Submit ballet modules from within JupyterLab',
     long_description=long_description,
     long_description_content_type='text/markdown',
     cmdclass=cmdclass,
     packages=find_packages(where='server',
-                           include=['ballet_submit_labextension',
-                                    'ballet_submit_labextension.*']),
+                           include=['ballet_assemble',
+                                    'ballet_assemble.*']),
     package_dir={'': 'server'},
     install_requires=install_requires,
     extras_require={

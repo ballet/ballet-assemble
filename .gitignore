@@ -109,4 +109,4 @@ dmypy.json
 # End of https://www.gitignore.io/api/python
 
 # labextension
-server/ballet_submit_labextension/labextension
+server/ballet_assemble/labextension

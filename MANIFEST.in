@@ -3,8 +3,8 @@ include README.md
 
 # Python backend files
 include setupbase.py
-include server/jupyter-config/ballet-submit-labextension.json
-include server/ballet_submit_labextension/labextension/*.tgz
+include server/jupyter-config/ballet-assemble.json
+include server/ballet_assemble/labextension/*.tgz
 
 # Javascript frontend files
 include package.json

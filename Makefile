@@ -65,7 +65,7 @@ test-install:
 
 .PHONY: test-python-lib
 test-python-lib: ## run python tests
-	python -m pytest -v --cov=ballet_submit_labextension server
+	python -m pytest -v --cov=ballet_assemble server
 
 .PHONY: test-js-lib
 test-js-lib: ## run js tests
@@ -77,8 +77,8 @@ lint: lint-python lint-js  ## lint
 
 .PHONY: lint-python
 lint-python: ## check python style with flake8 and isort
-	flake8 server/ballet_submit_labextension
-	isort -c --recursive server/ballet_submit_labextension
+	flake8 server/ballet_assemble
+	isort -c --recursive server/ballet_assemble
 
 .PHONY: lint-js
 lint-js: ## check js style with tslint
@@ -111,7 +111,7 @@ install-test: clean-build clean-py ## install the package and test dependencies
 .PHONY: install-develop
 install-develop: clean-build clean-py ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
-	jupyter serverextension enable --py ballet_submit_labextension
+	jupyter serverextension enable --py ballet_assemble
 	jlpm
 	jlpm build
 	jupyter labextension link

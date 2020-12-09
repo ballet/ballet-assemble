@@ -8,9 +8,9 @@ from traitlets.config import Config
 
 from notebook.tests.launchnotebook import NotebookTestBase
 
-import ballet_submit_labextension.app
-from ballet_submit_labextension import load_jupyter_server_extension
-from ballet_submit_labextension.app import BalletApp
+import ballet_assemble.app
+from ballet_assemble import load_jupyter_server_extension
+from ballet_assemble.app import AssembleApp
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def config():
 
 
 def test_app_config(config):
-    app = BalletApp.instance(config=config)
+    app = AssembleApp.instance(config=config)
     assert app.debug in {True, False}
 
 
@@ -32,20 +32,20 @@ class BaseTestCase(NotebookTestBase):
     def setup_class(cls):
         super().setup_class()
         load_jupyter_server_extension(cls.notebook)
-        cls.app = BalletApp.instance()
+        cls.app = AssembleApp.instance()
 
 
-class BalletHandlersTest(BaseTestCase):
+class AssembleHandlersTest(BaseTestCase):
 
     def test_status(self):
-        response = self.request('GET', '/ballet/status')
+        response = self.request('GET', '/assemble/status')
         d = response.json()
         assert 'OK' == d['status']
 
     def test_config(self):
-        traits = BalletApp.class_own_traits()
+        traits = AssembleApp.class_own_traits()
 
-        response = self.request('GET', '/ballet/config')
+        response = self.request('GET', '/assemble/config')
         d = response.json()
 
         assert d.keys() == traits.keys()
@@ -53,17 +53,17 @@ class BalletHandlersTest(BaseTestCase):
     def test_config_item(self):
         debug = self.app.debug
 
-        response = self.request('GET', '/ballet/config/debug')
+        response = self.request('GET', '/assemble/config/debug')
         d = response.json()
 
         assert d == {'debug': debug}
 
     def test_auth_authorize(self):
-        response = self.request('GET', '/ballet/auth/authorize', allow_redirects=False)
+        response = self.request('GET', '/assemble/auth/authorize', allow_redirects=False)
 
         assert response.status_code == http.HTTPStatus.FOUND
 
-    @patch('ballet_submit_labextension.handlers.requests')
+    @patch('ballet_assemble.handlers.requests')
     def test_auth_token(self, mock_requests):
         mock_response = Mock(spec=requests.Response)
         mock_requests.post.return_value = mock_response
@@ -77,7 +77,7 @@ class BalletHandlersTest(BaseTestCase):
         mock_response.ok = True
 
         self.app.debug = True
-        response = self.request('POST', '/ballet/auth/token')
+        response = self.request('POST', '/assemble/auth/token')
 
         assert response.ok
         assert self.app.github_token == token
@@ -85,19 +85,19 @@ class BalletHandlersTest(BaseTestCase):
     def test_auth_authenticated(self):
         self.app._is_authenticated = True
 
-        response = self.request('GET', '/ballet/auth/authenticated')
+        response = self.request('GET', '/assemble/auth/authenticated')
         d = response.json()
 
         assert 'result' in d and d['result']
 
-    @patch('ballet_submit_labextension.app.BalletApp.create_pull_request_for_code_content')
+    @patch('ballet_assemble.app.AssembleApp.create_pull_request_for_code_content')
     def test_submit(self, mock_create):
         url = 'url'
         result = True
-        mock_result = ballet_submit_labextension.app.Response(result=result, url=url)
+        mock_result = ballet_assemble.app.Response(result=result, url=url)
         mock_create.return_value = asdict(mock_result)
 
-        response = self.request('POST', '/ballet/submit', json={
+        response = self.request('POST', '/assemble/submit', json={
             'codeContent': 'code',
         })
         d = response.json()
@@ -105,12 +105,10 @@ class BalletHandlersTest(BaseTestCase):
         assert d['result'] == result and d['url'] == url
 
     def test_submit_empty_cell(self):
-        response = self.request('POST', '/ballet/submit', json={
+        response = self.request('POST', '/assemble/submit', json={
             'codeContent': '',
         })
         d = response.json()
 
         assert d['result'] == False
         assert d['message'] is not None
-
-

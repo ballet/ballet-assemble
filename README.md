@@ -1,79 +1,26 @@
-[![Github Actions Status](https://github.com/HDI-Project/ballet-submit-labextension/workflows/Main/badge.svg)](https://github.com/HDI-Project/ballet-submit-labextension/actions)
-[![PyPI Shield](https://img.shields.io/pypi/v/ballet-submit-labextension.svg)](https://pypi.org/project/ballet-submit-labextension)
-[![npm version](https://img.shields.io/npm/v/ballet-submit-labextension)](https://www.npmjs.com/package/ballet-submit-labextension)
+[![Github Actions Status](https://github.com/HDI-Project/ballet-assemble/workflows/Main/badge.svg)](https://github.com/HDI-Project/ballet-assemble/actions)
+[![PyPI Shield](https://img.shields.io/pypi/v/ballet-assemble.svg)](https://pypi.org/project/ballet-assemble)
+[![npm version](https://img.shields.io/npm/v/ballet-assemble)](https://www.npmjs.com/package/ballet-assemble)
 
-# ballet-submit-labextension
+# Assemblé
 
-Submit ballet modules from within JupyterLab
-
-This extension is composed of a Python package named `ballet-submit-labextension`
-for the server extension and a NPM package also named `ballet-submit-labextension`
-for the frontend extension.
-
-## Requirements
-
-- JupyterLab >= 2.0
-
-## Install
-
-Installation can be done completely using `pip`, which installs both the
-server and the frontend extensions. The frontend extension only can be
-installed using `jupyter labextension install` but will not function properly
-without the corresponding server extension.
-
-```bash
-pip install ballet-submit-labextension
-jupyter lab build
-```
-
-Note: You will need NodeJS to install the extension; the installation process
-will complain if it is not found.
-
-## Authenticate with GitHub
-
-The extension provides an in-lab experience for authenticating
-with GitHub. When you open a notebook, you should see the GitHub icon to the
-right on the Notebook toolbar. The icon should be grey at first, indicating
-you are not authenticated. Click the icon to open a login window, in which
-you can enter your GitHub username and password. These will be exchanged by
-the extension for an OAuth token and will be used to propose changes to the
-upstream Ballet project on your behalf (if you attempt to submit features).
-
-![Authenticate with GitHub](docs/_static/auth_with_github.gif)
-
-Alternately, you can provide a personal access token directly using the
-configuration approaches below.
-
-## Configure
-
-The extension ties into the same configuration system as Jupyter [Lab] itself.
-You can configure the extension with command line arguments or via the
-config file, just like you configure Jupyter Notebook or Jupyter Lab.
-
-### All configuration options
-
-The following configuration options are available:
-
-```
-$ python -c 'from ballet_submit_labextension.app import print_help;print_help()'
-
-BalletApp options
+/alletApp options
 -----------------
---BalletApp.access_token_timeout=<Int>
+--AssembleApp.access_token_timeout=<Int>
     Default: 60
     timeout to receive access token from server via polling
---BalletApp.ballet_yml_path=<Unicode>
+--AssembleApp.ballet_yml_path=<Unicode>
     Default: ''
     path to ballet.yml file of Ballet project (if Lab is not run from project
     directory)
---BalletApp.debug=<Bool>
+--AssembleApp.debug=<Bool>
     Default: False
-    enable debug mode (no changes made on GitHub), will read from $BALLET_DEBUG
+    enable debug mode (no changes made on GitHub), will read from $ASSEMBLE_DEBUG
     if present
---BalletApp.github_token=<Unicode>
+--AssembleApp.github_token=<Unicode>
     Default: ''
     github access token, will read from $GITHUB_TOKEN if present
---BalletApp.oauth_gateway_url=<Unicode>
+--AssembleApp.oauth_gateway_url=<Unicode>
     Default: 'https://github-oauth-gateway.herokuapp.com/'
     url to github-oauth-gateway server
 ```
@@ -84,7 +31,7 @@ Invoke Jupyter Lab with command line arguments providing config to the ballet
 extension, for example:
 
 ```
-jupyter lab --BalletApp.debug=True
+jupyter lab --AssembleApp.debug=True
 ```
 
 ### Config file
@@ -99,7 +46,7 @@ if it does not exist):
 2. Append desired config to the end of the file, for example:
 
     ```python
-    c.BalletApp.debug = True
+    c.AssembleApp.debug = True
     ```
 
 ## Troubleshoot
@@ -135,11 +82,11 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Move to ballet-submit-labextension directory
+# Move to ballet-assemble directory
 # Install server extension
 pip install -e .
 # Register server extension
-jupyter serverextension enable --py ballet-submit-labextension
+jupyter serverextension enable --py ballet_assemble
 # Install dependencies
 jlpm
 # Build Typescript source
@@ -165,8 +112,8 @@ jupyter lab --watch
 ### Uninstall
 
 ```bash
-pip uninstall ballet-submit-labextension
-jupyter labextension uninstall ballet-submit-labextension
+pip uninstall ballet_assemble
+jupyter labextension uninstall ballet-assemble
 ```
 
 ### Release process

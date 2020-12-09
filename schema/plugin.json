@@ -1,8 +1,8 @@
 {
-  "title": "Ballet Submit",
-  "description": "Ballet Submit settings.",
+  "title": "Ballet Assemble",
+  "description": "Ballet Assemble settings.",
   "jupyter.lab.setting-icon": "",
-  "jupyter.lab.setting-icon-label": "Ballet Submit Settings",
+  "jupyter.lab.setting-icon-label": "Ballet Assemble Settings",
   "properties": {},
   "type": "object"
 }

@@ -32,13 +32,13 @@ import {
 
 import $ from 'jquery';
 
-const EXTENSION_NAME = 'ballet-submit-labextension';
+const EXTENSION_NAME = 'ballet-assemble';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
 
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
  */
-export class BalletSubmitButtonExtension
+export class AssembleSubmitButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   settingRegistry: ISettingRegistry;
 
@@ -60,7 +60,7 @@ export class BalletSubmitButtonExtension
   ): IDisposable {
     let button = new ToolbarButton({
       label: 'Submit',
-      iconClass: 'fa fa-share ballet-submitButtonIcon',
+      iconClass: 'fa fa-share assemble-submitButtonIcon',
       onClick: async () => {
         // check if authenticated
         if (!(await isAuthenticated())) {
@@ -85,7 +85,7 @@ export class BalletSubmitButtonExtension
           return;
         }
 
-        // post contents to ballet-submit-server
+        // post contents to server
         console.log(contents);
         const result: ISubmissionResponse = await submit(contents);
 
@@ -110,10 +110,10 @@ export class BalletSubmitButtonExtension
       },
       tooltip: 'Submit current cell to Ballet project'
     });
-    panel.toolbar.addItem('balletSubmitButton', button);
+    panel.toolbar.addItem('assembleSubmitButton', button);
 
     let githubAuthButton = new ToolbarButton({
-      iconClass: 'fa fa-github ballet-githubAuthButtonIcon',
+      iconClass: 'fa fa-github assemble-githubAuthButtonIcon',
       onClick: async () => {
         if (!(await isAuthenticated())) {
           window.open(
@@ -140,8 +140,8 @@ export class BalletSubmitButtonExtension
     // ugh
     // TODO - remove callback when authenticated, assuming that we will never become un-authenticated
     setInterval(async () => {
-      $('.ballet-githubAuthButtonIcon').toggleClass(
-        'ballet-githubAuthButtonIcon-authenticated',
+      $('.assemble-githubAuthButtonIcon').toggleClass(
+        'assemble-githubAuthButtonIcon-authenticated',
         await isAuthenticated()
       );
     }, 5 * 1000);
@@ -163,30 +163,30 @@ async function activate(
   // add button to toolbar
   app.docRegistry.addWidgetExtension(
     'Notebook',
-    new BalletSubmitButtonExtension(settingRegistry)
+    new AssembleSubmitButtonExtension(settingRegistry)
   );
 
   // create submit command
-  const submitCommand: string = 'ballet:submit';
+  const submitCommand: string = 'assemble:submit';
   app.commands.addCommand(submitCommand, {
     label: 'Submit Feature',
     execute: () => {
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({ command: submitCommand, category: 'Ballet' });
+  palette.addItem({ command: submitCommand, category: 'Assemble' });
 
-  // check status of /ballet endpoints
+  // check status of /assemble endpoints
   try {
     await checkStatus();
-    console.log('Connected to /ballet endpoints');
+    console.log('Connected to /assemble endpoints');
   } catch {
-    console.error("Can't connect to /ballet endpoints");
+    console.error("Can't connect to /assemble endpoints");
   }
 }
 
 /**
- * Initialization data for the ballet-submit-labextension extension.
+ * Initialization data for the ballet-assemble extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,

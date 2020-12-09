@@ -87,13 +87,13 @@ def handlefailures(call):
         return Response(result=False, message=message, tb=tb)
 
 
-class BalletApp(SingletonConfigurable):
+class AssembleApp(SingletonConfigurable):
 
     # -- begin traits --
 
     debug = Bool(
         config=True,
-        help='enable debug mode (no changes made on GitHub), will read from $BALLET_DEBUG if '
+        help='enable debug mode (no changes made on GitHub), will read from $ASSEMBLE_DEBUG if '
              'present',
     )
 
@@ -101,7 +101,7 @@ class BalletApp(SingletonConfigurable):
     def _default_debug(self):
         _default = 'False'
         # fixme: truthy only works on strings as of ballet==0.6.11
-        return truthy(getenv('BALLET_DEBUG', default=_default))
+        return truthy(getenv('ASSEMBLE_DEBUG', default=_default))
 
     github_token = Unicode(
         config=True,
@@ -222,7 +222,7 @@ class BalletApp(SingletonConfigurable):
         with fy.suppress(Exception):
             return Project.from_cwd()
 
-        raise ConfigurationError('Could not detect ballet project')
+        raise ConfigurationError('Could not detect Ballet project')
 
     @fy.post_processing(asdict)
     @handlefailures
@@ -334,7 +334,7 @@ class BalletApp(SingletonConfigurable):
                 Submitted by user: {self.username}
 
                 --
-                Pull request automatically created by ballet-submit-labextension
+                Pull request automatically created by ballet-assemble
             ''')
         base = 'master'
         head = f'{self.username}:{branch_name}'
@@ -359,7 +359,7 @@ class BalletApp(SingletonConfigurable):
 
 
 def print_help():
-    BalletApp.class_print_help()
+    AssembleApp.class_print_help()
 
 
 if __name__ == '__main__':

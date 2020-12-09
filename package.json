@@ -1,5 +1,5 @@
 {
-  "name": "ballet-submit-labextension",
+  "name": "ballet-assemble",
   "version": "0.6.2",
   "description": "Submit ballet modules from within JupyterLab",
   "keywords": [
@@ -7,9 +7,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/HDI-Project/ballet-submit-labextension",
+  "homepage": "https://github.com/HDI-Project/ballet-assemble",
   "bugs": {
-    "url": "https://github.com/HDI-Project/ballet-submit-labextension/issues"
+    "url": "https://github.com/HDI-Project/ballet-assemble/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Micah Smith",
@@ -23,16 +23,16 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HDI-Project/ballet-submit-labextension.git"
+    "url": "https://github.com/HDI-Project/ballet-assemble.git"
   },
   "scripts": {
     "build": "jlpm run build:lib",
-    "build:labextension": "cd server/ballet_submit_labextension && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../../..",
+    "build:labextension": "cd server/ballet_assemble && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../../..",
     "build:lib": "tsc",
     "build:all": "jlpm run build:labextension",
     "clean": "jlpm run clean:lib",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
-    "clean:labextension": "rimraf server/ballet_submit_labextension/labextension",
+    "clean:labextension": "rimraf server/ballet_assemble/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "prepare": "jlpm run clean && jlpm run build",
     "watch": "tsc -w",
@@ -71,7 +71,7 @@
           "pip"
         ],
         "base": {
-          "name": "ballet_submit_labextension"
+          "name": "ballet_assemble"
         }
       }
     },

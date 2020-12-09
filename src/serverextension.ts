@@ -47,7 +47,7 @@ export async function isAuthenticated(): Promise<boolean> {
 
 export function getEndpointUrl(endPoint: string): string {
   const settings = ServerConnection.makeSettings();
-  return URLExt.join(settings.baseUrl, 'ballet', endPoint);
+  return URLExt.join(settings.baseUrl, 'assemble', endPoint);
 }
 
 /**

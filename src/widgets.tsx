@@ -12,7 +12,7 @@ export class ConfirmWidget extends ReactWidget {
 
   render() {
     return (
-      <div className="ballet-featureSubmittedConfirm">
+      <div className="assemble-featureSubmittedConfirm">
         <p>
           {' '}
           The following feature would be submitted to the upstream Ballet
@@ -39,7 +39,7 @@ export class FeatureSubmittedOkayWidget extends ReactWidget {
 
   render() {
     return (
-      <div className="ballet-featureSubmittedOkay">
+      <div className="assemble-featureSubmittedOkay">
         <p> Your feature was submitted! </p>
         <br />
         <p>

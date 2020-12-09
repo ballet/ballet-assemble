@@ -11,7 +11,7 @@ from tenacity import (
     wait_fixed)
 from tornado.httpclient import AsyncHTTPClient
 
-from .app import BalletApp
+from .app import AssembleApp
 
 GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize'
 
@@ -27,7 +27,7 @@ class ConfigHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
         result = {}
         for attr in app.class_own_traits():
             result[attr] = getattr(app, attr)
@@ -38,7 +38,7 @@ class ConfigItemHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self, attr):
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
         try:
             param = getattr(app, attr)
             self.write({attr: param})
@@ -51,7 +51,7 @@ class SubmitHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         input_data = self.get_json_body()
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
         result = app.create_pull_request_for_code_content(input_data)
         self.write(result)
 
@@ -60,7 +60,7 @@ class AuthorizeHandler(IPythonHandler):
 
     @tornado.web.authenticated
     def get(self):
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
 
         # wake server async
         http_client = AsyncHTTPClient()
@@ -87,7 +87,7 @@ class TokenHandler(IPythonHandler):
             retry_if_exception_type(RuntimeError) &
             retry_if_exception_message(match=r'[Nn]o authorization code found.*')
         ),
-        stop=stop_after_delay(BalletApp.instance().access_token_timeout)
+        stop=stop_after_delay(AssembleApp.instance().access_token_timeout)
     )
     @tornado.gen.coroutine
     def get_token(self, url, data):
@@ -104,7 +104,7 @@ class TokenHandler(IPythonHandler):
     @tornado.gen.coroutine
     def post(self):
         """request token if we have just authenticated"""
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
         base = app.oauth_gateway_url
         state = app.state
         url = urljoin(base, '/api/v1/access_token')
@@ -126,7 +126,7 @@ class AuthenticatedHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        app = BalletApp.instance()
+        app = AssembleApp.instance()
         self.write({
             'result': app.is_authenticated(),
             'message': None,

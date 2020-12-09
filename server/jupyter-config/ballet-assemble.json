@@ -1,7 +1,7 @@
 {
   "NotebookApp": {
     "nbserver_extensions": {
-      "ballet_submit_labextension": true
+      "ballet_assemble": true
     }
   }
 }
