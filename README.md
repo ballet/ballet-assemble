@@ -1,10 +1,71 @@
 [![Github Actions Status](https://github.com/HDI-Project/ballet-assemble/workflows/Main/badge.svg)](https://github.com/HDI-Project/ballet-assemble/actions)
-[![PyPI Shield](https://img.shields.io/pypi/v/ballet-assemble.svg)](https://pypi.org/project/ballet-assemble)
+[![PyPI Shield](https://img.shields.io/pypi/v/ballet_assemble.svg)](https://pypi.org/project/ballet_assemble)
 [![npm version](https://img.shields.io/npm/v/ballet-assemble)](https://www.npmjs.com/package/ballet-assemble)
 
 # Assemblé
 
-/alletApp options
+A development environment for Ballet collaborations on top of Jupyter Lab
+
+Using Assemblé, you can develop patches for Ballet projects within Jupyter
+Lab and then easily submit them as GitHub Pull Requests (PRs) in one click
+without leaving your notebook.
+
+Assemblé (pronounced "assam blay") is a ballet move that involves lifting
+off the floor on one leg and landing on two.
+
+Assemblé is composed of (1) a Python package named `ballet_assemble` for the
+server extension (2) a NPM package also named `ballet-assemble` for the
+frontend extension and (3) tight integration with Binder for each Ballet
+project.
+
+## Requirements
+
+- JupyterLab >= 2.0
+
+## Install
+
+Installation can be done completely using `pip`, which installs both the
+server and the frontend extensions. The frontend extension only can be
+installed using `jupyter labextension install` but will not function properly
+without the corresponding server extension.
+
+```bash
+pip install ballet_assemble
+jupyter lab build
+```
+
+Note: You will need NodeJS to install the extension; the installation process
+will complain if it is not found.
+
+## Authenticate with GitHub
+
+The extension provides an in-Lab experience for authenticating
+with GitHub. When you open a notebook, you should see the GitHub icon to the
+right on the Notebook toolbar. The icon should be grey at first, indicating
+you are not authenticated. Click the icon to open a login window, in which
+you can enter your GitHub username and password. These will be exchanged by
+the extension for an OAuth token and will be used to propose changes to the
+upstream Ballet project on your behalf (if you attempt to submit features).
+
+![Authenticate with GitHub](docs/_static/auth_with_github.gif)
+
+Alternately, you can provide a personal access token directly using the
+configuration approaches below.
+
+## Configure
+
+The extension ties into the same configuration system as Jupyter [Lab] itself.
+You can configure the extension with command line arguments or via the
+config file, just like you configure Jupyter Notebook or Jupyter Lab.
+
+### All configuration options
+
+The following configuration options are available:
+
+```
+$ python -c 'from ballet_assemble.app import print_help;print_help()'
+
+AssembleApp options
 -----------------
 --AssembleApp.access_token_timeout=<Int>
     Default: 60
@@ -15,8 +76,8 @@
     directory)
 --AssembleApp.debug=<Bool>
     Default: False
-    enable debug mode (no changes made on GitHub), will read from $ASSEMBLE_DEBUG
-    if present
+    enable debug mode (no changes made on GitHub), will read from
+    $ASSEMBLE_DEBUG if present
 --AssembleApp.github_token=<Unicode>
     Default: ''
     github access token, will read from $GITHUB_TOKEN if present
