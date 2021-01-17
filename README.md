@@ -47,7 +47,7 @@ you can enter your GitHub username and password. These will be exchanged by
 the extension for an OAuth token and will be used to propose changes to the
 upstream Ballet project on your behalf (if you attempt to submit features).
 
-![Authenticate with GitHub](docs/_static/auth_with_github.gif)
+![Authenticate with GitHub](docs/_static/auth_with_github_anon.gif)
 
 Alternately, you can provide a personal access token directly using the
 configuration approaches below.
