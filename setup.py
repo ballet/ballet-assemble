@@ -1,5 +1,5 @@
 """
-Setup Module to setup Python Handlers for the ballet-submit-labextension extension.
+Setup Module to setup Python Handlers for ballet-assemble.
 """
 import os
 
@@ -34,7 +34,7 @@ data_files_spec = [
     (
         'etc/jupyter/jupyter_notebook_config.d',
         os.path.join(HERE, 'server', 'jupyter-config'),
-        'ballet-submit-labextension.json',
+        'ballet-assemble.json',
     ),
 ]
 
@@ -49,19 +49,19 @@ cmdclass['jsdeps'] = combine_commands(
     ensure_targets(jstargets),
 )
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
+with open('README.md', 'r', encoding='utf-8') as f:
+    long_description = f.read()
 
 install_requires = [
-    'jupyterlab ~= 2.0',
-    'black == 19.10b0',
     'ballet',
+    'black == 19.10b0',
     'funcy',
     'gitpython',
+    'jupyterlab ~= 2.0',
     'notebook',
     'pygithub',
-    'stacklog',
     'requests',
+    'stacklog',
     'tenacity',
     'tornado',
 ]
