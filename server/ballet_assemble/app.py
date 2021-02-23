@@ -126,7 +126,7 @@ class AssembleApp(SingletonConfigurable):
             return proposal
 
     oauth_gateway_url = Unicode(
-        'https://github-oauth-gateway.herokuapp.com/',
+        'https://github-oauth-gateway.herokuapp.com',
         config=True,
         help='url to github-oauth-gateway server',
     )
@@ -296,8 +296,13 @@ class AssembleApp(SingletonConfigurable):
             'username': self.username.replace('-', '_'),
             'featurename': feature_name,
         }
+        contrib_dir = self.project.config.get('contrib.module_path')
         changes = ballet.templating.start_new_feature(
-            no_input=True, extra_context=extra_context)
+            contrib_dir=contrib_dir,
+            branching=False,
+            no_input=True,
+            extra_context=extra_context
+        )
         changed_files = [
             str(pathlib.Path(name).relative_to(dirname))
             for (name, kind) in changes
