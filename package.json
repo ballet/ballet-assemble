@@ -1,6 +1,6 @@
 {
   "name": "ballet-assemble",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Submit ballet modules from within JupyterLab",
   "keywords": [
     "jupyter",
