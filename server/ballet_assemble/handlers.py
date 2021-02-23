@@ -1,4 +1,5 @@
 from functools import partial
+from importlib import metadata
 from urllib.parse import urlencode, urljoin
 
 import requests
@@ -21,6 +22,17 @@ class StatusHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
         self.write({'status': 'OK'})
+
+
+class VersionHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+        try:
+            version = metadata.version('ballet_assemble')
+        except metadata.PackageNotFoundError:
+            version = '<unknown>'
+        self.write({'version': version})
 
 
 class ConfigHandler(APIHandler):
@@ -140,6 +152,7 @@ def setup_handlers(app: NotebookWebApplication, url_path: str):
 
     app.add_handlers(host_pattern, [
         (route_pattern('status'), StatusHandler),
+        (route_pattern('version'), VersionHandler),
         (route_pattern('config'), ConfigHandler),
         (route_pattern(r'config/(.*)'), ConfigItemHandler),
         (route_pattern('submit'), SubmitHandler),
