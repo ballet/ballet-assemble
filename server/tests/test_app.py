@@ -42,6 +42,11 @@ class AssembleHandlersTest(BaseTestCase):
         d = response.json()
         assert 'OK' == d['status']
 
+    def test_version(self):
+        response = self.request('GET', '/assemble/version')
+        version = response.json()['version']
+        assert isinstance(version, str)
+
     def test_config(self):
         traits = AssembleApp.class_own_traits()
 
