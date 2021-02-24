@@ -89,7 +89,7 @@ development_requirements = [
 
 setup_args = dict(
     name='ballet-assemble',
-    version='0.8.6',
+    version='0.8.7',
     url='https://github.com/HDI-Project/ballet-assemble',
     author='Micah Smith',
     description='Submit ballet modules from within JupyterLab',
