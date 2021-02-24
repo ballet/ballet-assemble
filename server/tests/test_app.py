@@ -1,13 +1,12 @@
 import http
 from dataclasses import asdict
-from packaging.version import Version
 from unittest.mock import Mock, patch
 
 import pytest
 import requests
-from traitlets.config import Config
-
 from notebook.tests.launchnotebook import NotebookTestBase
+from packaging.version import Version
+from traitlets.config import Config
 
 import ballet_assemble.app
 from ballet_assemble import load_jupyter_server_extension

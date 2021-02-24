@@ -1,5 +1,4 @@
 from functools import partial
-from importlib import metadata
 from urllib.parse import urlencode, urljoin
 
 import requests
@@ -13,6 +12,12 @@ from tenacity import (
 from tornado.httpclient import AsyncHTTPClient
 
 from .app import AssembleApp
+
+try:
+    from importlib import metadata
+except ImportError:
+    import importlib_metadata as metadata
+
 
 GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize'
 
