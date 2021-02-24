@@ -1,5 +1,6 @@
 import http
 from dataclasses import asdict
+from packaging.version import Version
 from unittest.mock import Mock, patch
 
 import pytest
@@ -44,8 +45,16 @@ class AssembleHandlersTest(BaseTestCase):
 
     def test_version(self):
         response = self.request('GET', '/assemble/version')
-        version = response.json()['version']
-        assert isinstance(version, str)
+        d = response.json()
+
+        assemble_version = d['assemble']
+        assert assemble_version is None or Version(assemble_version)
+
+        ballet_version = d['ballet']
+        assert ballet_version is None or Version(ballet_version)
+
+        project_version = d['project']
+        assert project_version is None or isinstance(project_version, str)
 
     def test_config(self):
         traits = AssembleApp.class_own_traits()

@@ -28,11 +28,26 @@ class VersionHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
+        app = AssembleApp.instance()
+
         try:
-            version = metadata.version('ballet_assemble')
-        except metadata.PackageNotFoundError:
-            version = '<unknown>'
-        self.write({'version': version})
+            assemble_version = metadata.version('ballet_assemble')
+        except Exception:
+            assemble_version = None
+        try:
+            ballet_version = metadata.version('ballet')
+        except Exception:
+            ballet_version = None
+        try:
+            project_version = app.project.version
+        except Exception:
+            project_version = None
+
+        self.write({
+            'assemble': assemble_version,
+            'ballet': ballet_version,
+            'project': project_version,
+        })
 
 
 class ConfigHandler(APIHandler):
