@@ -58,6 +58,7 @@ install_requires = [
     'funcy',
     'gitpython',
     'jupyterlab ~= 2.0',
+    'importlib-metadata; python_version < "3.8"',
     'notebook',
     'pygithub',
     'requests',
