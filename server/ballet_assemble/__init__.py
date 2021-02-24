@@ -4,7 +4,7 @@
 
 __author__ = 'Micah Smith'
 __email__ = 'micahs@mit.edu'
-__version__ = '0.8.5'
+__version__ = '0.8.6'
 
 from jupyterlab.labapp import LabApp
 
