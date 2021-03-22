@@ -183,3 +183,9 @@ jupyter labextension uninstall ballet-assemble
 bumpversion <part>
 make release
 ```
+
+## Credits
+
+### Contributors
+
+- Micah Smith (<micahs@mit.edu>)
