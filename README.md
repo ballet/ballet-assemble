@@ -1,4 +1,4 @@
-[![Github Actions Status](https://github.com/HDI-Project/ballet-assemble/workflows/Main/badge.svg)](https://github.com/HDI-Project/ballet-assemble/actions)
+[![Github Actions Status](https://github.com/ballet/ballet-assemble/workflows/Main/badge.svg)](https://github.com/ballet/ballet-assemble/actions)
 [![PyPI Shield](https://img.shields.io/pypi/v/ballet_assemble.svg)](https://pypi.org/project/ballet_assemble)
 [![npm version](https://img.shields.io/npm/v/ballet-assemble)](https://www.npmjs.com/package/ballet-assemble)
 

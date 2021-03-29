@@ -7,9 +7,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/HDI-Project/ballet-assemble",
+  "homepage": "https://github.com/ballet/ballet-assemble",
   "bugs": {
-    "url": "https://github.com/HDI-Project/ballet-assemble/issues"
+    "url": "https://github.com/ballet/ballet-assemble/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Micah Smith",
@@ -23,7 +23,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HDI-Project/ballet-assemble.git"
+    "url": "https://github.com/ballet/ballet-assemble.git"
   },
   "scripts": {
     "build": "jlpm run build:lib",
