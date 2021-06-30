@@ -32,7 +32,6 @@ import {
   isAuthenticated
 } from './serverextension';
 
-
 const EXTENSION_NAME = 'ballet-assemble';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
 
@@ -65,7 +64,7 @@ export class AssembleSubmitButtonExtension
       label: 'Submit',
       icon: new LabIcon({
         name: 'ballet-icon',
-        svgstr: balletIconSvg,
+        svgstr: balletIconSvg
       }),
       onClick: async () => {
         // check if authenticated
@@ -151,7 +150,7 @@ export class AssembleSubmitButtonExtension
       let authenticated = await isAuthenticated();
       githubAuthButton.toggleClass(
         'assemble-githubAuthButtonIcon-authenticated',
-        authenticated,
+        authenticated
       );
       if (authenticated) {
         // githubAuthButton.update = 'Already authenticated with GitHub';
