@@ -32,7 +32,6 @@ import {
   isAuthenticated
 } from './serverextension';
 
-import $ from 'jquery';
 
 const EXTENSION_NAME = 'ballet-assemble';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
@@ -146,12 +145,19 @@ export class AssembleSubmitButtonExtension
 
     // ugh
     // TODO - remove callback when authenticated, assuming that we will never become un-authenticated
-    setInterval(async () => {
-      $('.assemble-githubAuthButtonIcon').toggleClass(
+    let authIntervalId = setInterval(authCallback, 5 * ONE_SECOND);
+
+    async function authCallback() {
+      let authenticated = await isAuthenticated();
+      githubAuthButton.toggleClass(
         'assemble-githubAuthButtonIcon-authenticated',
-        await isAuthenticated()
+        authenticated,
       );
-    }, 5 * 1000);
+      if (authenticated) {
+        // githubAuthButton.update = 'Already authenticated with GitHub';
+        clearInterval(authIntervalId);
+      }
+    }
 
     return new DisposableDelegate(() => {
       button.dispose();
