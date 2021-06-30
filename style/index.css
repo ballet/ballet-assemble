@@ -14,5 +14,8 @@
 }
 
 .assemble-githubAuthButtonIcon-authenticated {
-  color: green;
+  color: black;
+  background-color: var(--jp-success-color2);
+  border-radius: 5px;
+  border: 5px solid var(--jp-success-color2);
 }
