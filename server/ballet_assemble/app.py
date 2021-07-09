@@ -264,6 +264,10 @@ class AssembleApp(SingletonConfigurable):
 
     @stacklog('INFO', 'Forking upstream repo')
     def fork_repo(self) -> None:
+        """Ask GitHub to create a fork of the repo and return immediately"""
+        # From https://docs.github.com/en/rest/reference/repos#create-a-fork:
+        # > Note: Forking a Repository happens asynchronously. You may have to
+        # > wait a short period of time before you can access the git objects.
         if not self.debug:
             return self.upstream_repo.create_fork()
         else:
