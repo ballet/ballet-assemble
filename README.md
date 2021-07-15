@@ -21,6 +21,7 @@ project.
 ## Requirements
 
 - JupyterLab >= 2.0
+- Python>=3.6 (64-bit Version)
 
 ## Install
 
@@ -175,6 +176,11 @@ jupyter lab --watch
 ```bash
 pip uninstall ballet_assemble
 jupyter labextension uninstall ballet-assemble
+```
+
+### Run
+```bash
+jupyter lab
 ```
 
 ### Release process
