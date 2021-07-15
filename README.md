@@ -21,7 +21,7 @@ project.
 ## Requirements
 
 - JupyterLab >= 2.0
-- Python 64-bit Version
+- Python>=3.6 (64-bit Version)
 
 ## Install
 
