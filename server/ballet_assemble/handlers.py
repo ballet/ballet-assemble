@@ -121,20 +121,18 @@ class TokenHandler(IPythonHandler):
         ),
         stop=stop_after_delay(AssembleApp.instance().access_token_timeout)
     )
-    @tornado.gen.coroutine
-    def get_token(self, url, data):
+    async def get_token(self, url, data):
         response = requests.post(url, json=data)
         d = response.json()
         if response.ok:
             # TODO also store other token info
-            raise tornado.gen.Return(d['access_token'])
+            return d['access_token']
         else:
             reason = d.get('message', '').lower()
             raise RuntimeError(reason)
 
     @tornado.web.authenticated
-    @tornado.gen.coroutine
-    def post(self):
+    async def post(self):
         """request token if we have just authenticated"""
         app = AssembleApp.instance()
         base = app.oauth_gateway_url
@@ -143,7 +141,7 @@ class TokenHandler(IPythonHandler):
         data = {'state': state}
 
         try:
-            token = yield self.get_token(url, data)
+            token = await self.get_token(url, data)
             app.set_github_token(token)
             self.finish()
         except RetryError:
