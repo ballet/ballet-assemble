@@ -138,6 +138,8 @@ jupyter lab build
 
 ### Development Install
 
+Running `make install-develop` will install necessary dependencies and set up the development environment. Alternatively, these steps can be be taken manually with the instructions below
+
 The `jlpm` command is JupyterLab's pinned version of
 [yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
 `yarn` or `npm` in lieu of `jlpm` below.
@@ -145,8 +147,8 @@ The `jlpm` command is JupyterLab's pinned version of
 ```bash
 # Clone the repo to your local environment
 # Move to ballet-assemble directory
-# Install server extension
-pip install -e .
+# Install server extension with dev dependencies
+pip install -e .[dev]
 # Register server extension
 jupyter serverextension enable --py ballet_assemble
 # Install dependencies
