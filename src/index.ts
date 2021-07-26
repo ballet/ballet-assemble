@@ -117,11 +117,12 @@ export class AssembleSubmitButtonExtension
     });
     panel.toolbar.addItem('assembleSubmitButton', button);
 
+    let popup: Window;
     let githubAuthButton = new ToolbarButton({
       iconClass: 'fa fa-github assemble-githubAuthButtonIcon',
       onClick: async () => {
         if (!(await isAuthenticated())) {
-          window.open(
+          popup = window.open(
             getEndpointUrl('auth/authorize'),
             '_blank',
             'width=350,height=600'
@@ -155,6 +156,9 @@ export class AssembleSubmitButtonExtension
       if (authenticated) {
         // githubAuthButton.update = 'Already authenticated with GitHub';
         clearInterval(authIntervalId);
+        if (!popup.closed) {
+          popup.close();
+        }
       }
     }
 
