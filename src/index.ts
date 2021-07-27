@@ -6,24 +6,24 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {LabIcon} from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
-import {IDisposable, DisposableDelegate} from '@lumino/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {DocumentRegistry} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import {ISettingRegistry} from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import {ConfirmWidget, FeatureSubmittedOkayWidget} from './widgets';
+import { ConfirmWidget, FeatureSubmittedOkayWidget } from './widgets';
 
-import fooSvgstr from '../resources/logo.svg';
+import fooSvgstr from '/resources/logo.svg';
 
 import {
   ISubmissionResponse,
@@ -188,7 +188,7 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({command: submitCommand, category: 'Assemble'});
+  palette.addItem({ command: submitCommand, category: 'Assemble' });
 
   // check status of /assemble endpoints
   try {
