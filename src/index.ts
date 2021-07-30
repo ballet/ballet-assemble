@@ -117,12 +117,11 @@ export class AssembleSubmitButtonExtension
     });
     panel.toolbar.addItem('assembleSubmitButton', button);
 
-    let popup: Window;
     let githubAuthButton = new ToolbarButton({
       iconClass: 'fa fa-github assemble-githubAuthButtonIcon',
       onClick: async () => {
         if (!(await isAuthenticated())) {
-          popup = window.open(
+          const popup = window.open(
             getEndpointUrl('auth/authorize'),
             '_blank',
             'width=350,height=600'
@@ -131,6 +130,14 @@ export class AssembleSubmitButtonExtension
           void request<void>('auth/token', {
             method: 'POST'
           });
+
+          let authIntervalId;
+          authIntervalId = setInterval(
+            authCallback,
+            0.5 * ONE_SECOND,
+            popup,
+            authIntervalId
+          );
         } else {
           void showDialog({
             title: 'Already authenticated',
@@ -143,24 +150,25 @@ export class AssembleSubmitButtonExtension
     });
     panel.toolbar.addItem('githubAuthButton', githubAuthButton);
 
-    // ugh
-    // TODO - remove callback when authenticated, assuming that we will never become un-authenticated
-    let authIntervalId = setInterval(authCallback, 5 * ONE_SECOND);
-
-    async function authCallback() {
-      let authenticated = await isAuthenticated();
+    async function authCallback(popup?: Window, authIntervalId?: number) {
+      const authenticated = await isAuthenticated();
       githubAuthButton.toggleClass(
         'assemble-githubAuthButtonIcon-authenticated',
         authenticated
       );
       if (authenticated) {
         // githubAuthButton.update = 'Already authenticated with GitHub';
-        clearInterval(authIntervalId);
-        if (!popup.closed) {
+        if (authIntervalId) {
+          clearInterval(authIntervalId);
+        }
+        if (popup && !popup.closed) {
           popup.close();
         }
       }
     }
+
+    // check for previously successful authentication immediately to apply the appropriate button class
+    authCallback().catch(console.warn);
 
     return new DisposableDelegate(() => {
       button.dispose();
