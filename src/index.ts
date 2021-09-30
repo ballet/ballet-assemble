@@ -32,6 +32,16 @@ import {
   isAuthenticated
 } from './serverextension';
 
+import { parse } from '@andrewhead/python-program-analysis';
+const code = [
+  'x, y = 0, 0',
+  'while x < 10:',
+  '   y += x * 2',
+  '   x += 1',
+  'print(y)'
+];
+parse(code.join('\n'));
+
 const EXTENSION_NAME = 'ballet-assemble';
 const PLUGIN_ID = `${EXTENSION_NAME}:plugin`;
 
