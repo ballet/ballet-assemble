@@ -56,3 +56,27 @@ export class FeatureSubmittedOkayWidget extends ReactWidget {
     );
   }
 }
+
+export class PreviewCodeWidget extends ReactWidget {
+  code: string;
+
+  constructor(code: string) {
+    super();
+    this.code = code;
+    this.addClass('jp-ReactWidget');
+  }
+
+  render() {
+    return (
+      <div className="assemble-featureSlicePreview">
+        <p> The following cells were gathered: </p>
+        <div>
+          <pre>
+            <code>{this.code}</code>
+          </pre>
+        </div>
+      </div>
+    );
+  }
+}
+

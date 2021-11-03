@@ -42,6 +42,7 @@
     "tslint:check": "tslint -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'"
   },
   "dependencies": {
+    "@andrewhead/python-program-analysis": "^0.4.8",
     "@jupyterlab/application": "^2.0.1",
     "@jupyterlab/apputils": "^2.0.1",
     "@jupyterlab/docregistry": "^2.0.1",
