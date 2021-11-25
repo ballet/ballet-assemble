@@ -21,12 +21,12 @@ import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { slice } from '@andrewhead/python-program-analysis/src/slice';
 import {
+  Location,
+  LocationSet,
   parse,
-  Location
-} from '@andrewhead/python-program-analysis/src/python-parser';
-import { LocationSet } from '@andrewhead/python-program-analysis/src';
+  slice,
+} from '@andrewhead/python-program-analysis';
 
 import {
   ConfirmWidget,
