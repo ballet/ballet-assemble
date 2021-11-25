@@ -51,13 +51,13 @@ const ONE_SECOND = 1000;
 
 class Loc implements Location {
   // tslint:disable-next-line:variable-name
-  first_line;
+  first_line: number;
   // tslint:disable-next-line:variable-name
-  first_column;
+  first_column: number;
   // tslint:disable-next-line:variable-name
-  last_line;
+  last_line: number;
   // tslint:disable-next-line:variable-name
-  last_column;
+  last_column: number;
 }
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
