@@ -6,20 +6,20 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { LabIcon } from '@jupyterlab/ui-components';
+import {LabIcon} from '@jupyterlab/ui-components';
 
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import {IDisposable, DisposableDelegate} from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {DocumentRegistry} from '@jupyterlab/docregistry';
 
-import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {ISettingRegistry} from '@jupyterlab/settingregistry';
 
 import {
   Location,
@@ -59,6 +59,7 @@ class Loc implements Location {
   // tslint:disable-next-line:variable-name
   last_column: number;
 }
+
 /**
  * A notebook widget extension that adds a submit button to the toolbar.
  */
@@ -221,45 +222,66 @@ export class AssembleSubmitButtonExtension
         svgstr: balletIconSvg
       }),*/
       onClick: async () => {
-        // todo: check if authenticated
-        alert('Slice!');
+        // todo: check if authenticated OR make spinner/loading sign
+        alert('Slicing...!');
 
         // load current cell
         let notebook = panel.content;
         let cells = panel.content.model.cells;
+
         let content = new Array(cells.length);
         for (let i = 0; i < cells.length; i++) {
           content[i] = cells.get(i).value.text;
-          console.log(cells.get(i).value.text);
         }
-        let cts = content.join('\n');
+        let ctsJoined = content.join('\n');
+        let ctsSplit = ctsJoined.split('\n');
         let activeCell = notebook.activeCell;
-        let contents = activeCell.model.value.text;
+        let currConntent = activeCell.model.value.text;
+        console.log('active cell');
+        console.log(notebook.activeCellIndex);
+        console.log(currConntent);
+        console.log('all cells');
+        console.log(ctsJoined);
 
         // confirm to proceed
         const confirmDialog = await showDialog({
-          title: 'Slice code?',
-          body: new PreviewCodeWidget(cts)
+          title: 'Slice this code?',
+          body: new PreviewCodeWidget(ctsJoined)
         });
         if (!confirmDialog.button.accept) {
           return;
         }
-
-        console.log(contents);
-        // slice here
-        // [done] make string array of code lines: content[]
         // from here on: andrew head´s code slicing;
         // use parse(array) to generate tree
-        let tree = parse(content.join('\n'));
+        let tree = parse(ctsJoined);
         // create location type: e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10} line 6 from char 0 to char 10 (include eol)
-        let loc = this.getLocationFromCurrentCell(notebook.activeCell, content);
+        let loc = this.getLocationFromCurrentCell(
+          notebook.activeCell,
+          ctsSplit
+        );
+        console.log('location');
+        console.log(loc);
         // -> eg. get first and last line of activeCell.model.value.text and get corresponding indices in content[]
         // return set of locations, whose first_line elem mark the lines that should be included
         let slicedLoc = slice(tree, loc);
+        console.log('sliced:');
+
+        let slicedCode = new Array(slicedLoc.items.length);
         for (let i = 0; i < slicedLoc.items.length; i++) {
-          console.log(slicedLoc.items[i].first_line);
+          const line = slicedLoc.items[i].first_line;
+          console.log(line);
+          console.log(ctsSplit[line - 1]);
+          slicedCode[i] = ctsSplit[line - 1];
         }
 
+        console.log(slicedCode.reverse());
+        const finalDialog = await showDialog({
+          title: 'Here is you code slice:',
+          body: new PreviewCodeWidget(slicedCode.join('\n'))
+        });
+        if (!finalDialog.button.accept) {
+          return;
+        }
         // submit code (submitbutton as part of the widget)
         // post contents to server
         // see createSubmitButton
@@ -272,11 +294,14 @@ export class AssembleSubmitButtonExtension
   private getLocationFromCurrentCell(activeCell: any, content: String[]) {
     let firstLine = content.length;
     let lastLine = 0;
-    let activeCode = activeCell.model.value.text;
+    let activeCode = activeCell.model.value.text.toString();
+    console.log('active code:');
+    console.log(activeCode);
 
     // extract indices of first and last line
     for (let i = 0; i < content.length; i++) {
-      if (activeCode.contains(content[i])) {
+      if (activeCode.includes(content[i]) && content[i].length > 0) {
+        console.log(content[i]);
         if (i < firstLine) {
           firstLine = i;
         }
@@ -285,14 +310,20 @@ export class AssembleSubmitButtonExtension
         }
       }
     }
-    console.log(firstLine + ' ' + lastLine);
+
     let lastColumn = 0;
     if (content[firstLine].length > content[lastLine].length) {
       lastColumn = content[firstLine].length;
     } else {
       lastColumn = content[lastLine].length;
     }
-    // {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
+
+    // Location starts linecount at 1, not 0. Thus +1 has to be added to linecounter
+    firstLine = firstLine + 1;
+    lastLine = lastLine + 1;
+    console.log(firstLine + ' ' + lastLine);
+
+    /* // {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
     let loc =
       '{first_line: ' +
       firstLine +
@@ -300,7 +331,7 @@ export class AssembleSubmitButtonExtension
       lastLine +
       ', last_column: ' +
       lastColumn +
-      '}';
+      '}';*/
 
     let l = new Loc();
     l.first_line = firstLine;
@@ -308,7 +339,7 @@ export class AssembleSubmitButtonExtension
     l.last_line = lastLine;
     l.last_column = lastColumn;
 
-    console.log(loc);
+    console.log(l);
     let ls = new LocationSet(l);
     return ls;
   }

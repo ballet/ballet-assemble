@@ -79,4 +79,3 @@ export class PreviewCodeWidget extends ReactWidget {
     );
   }
 }
-
