@@ -60,9 +60,9 @@ export class FeatureSubmittedOkayWidget extends ReactWidget {
 export class PreviewCodeWidget extends ReactWidget {
   code: string;
 
-  constructor(code: string) {
+  constructor(array: string) {
     super();
-    this.code = code;
+    this.code = array;
     this.addClass('jp-ReactWidget');
   }
 

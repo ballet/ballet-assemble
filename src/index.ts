@@ -236,12 +236,13 @@ export class AssembleSubmitButtonExtension
         let ctsJoined = content.join('\n');
         let ctsSplit = ctsJoined.split('\n');
         let activeCell = notebook.activeCell;
-        let currConntent = activeCell.model.value.text;
+        let currContent = activeCell.model.value.text;
         console.log('active cell');
         console.log(notebook.activeCellIndex);
-        console.log(currConntent);
+        console.log(currContent);
         console.log('all cells');
         console.log(ctsJoined);
+        console.log(ctsSplit);
 
         // confirm to proceed
         const confirmDialog = await showDialog({
@@ -266,18 +267,20 @@ export class AssembleSubmitButtonExtension
         let slicedLoc = slice(tree, loc);
         console.log('sliced:');
 
-        let slicedCode = new Array(slicedLoc.items.length);
+        let map = new Map();
         for (let i = 0; i < slicedLoc.items.length; i++) {
           const line = slicedLoc.items[i].first_line;
           console.log(line);
           console.log(ctsSplit[line - 1]);
-          slicedCode[i] = ctsSplit[line - 1];
+          map.set(line, ctsSplit[line - 1]);
         }
 
-        console.log(slicedCode.reverse());
+        let arraySorted = [...map.entries()].sort();
+        console.log(arraySorted);
+
         const finalDialog = await showDialog({
           title: 'Here is you code slice:',
-          body: new PreviewCodeWidget(slicedCode.join('\n'))
+          body: new PreviewCodeWidget(arraySorted.join('\n'))
         });
         if (!finalDialog.button.accept) {
           return;
@@ -301,7 +304,6 @@ export class AssembleSubmitButtonExtension
     // extract indices of first and last line
     for (let i = 0; i < content.length; i++) {
       if (activeCode.includes(content[i]) && content[i].length > 0) {
-        console.log(content[i]);
         if (i < firstLine) {
           firstLine = i;
         }
@@ -323,23 +325,12 @@ export class AssembleSubmitButtonExtension
     lastLine = lastLine + 1;
     console.log(firstLine + ' ' + lastLine);
 
-    /* // {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
-    let loc =
-      '{first_line: ' +
-      firstLine +
-      ', first_column: 0, last_line: ' +
-      lastLine +
-      ', last_column: ' +
-      lastColumn +
-      '}';*/
-
     let l = new Loc();
     l.first_line = firstLine;
     l.first_column = 0;
     l.last_line = lastLine;
     l.last_column = lastColumn;
 
-    console.log(l);
     let ls = new LocationSet(l);
     return ls;
   }
