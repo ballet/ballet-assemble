@@ -6,26 +6,26 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {LabIcon} from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
-import {IDisposable, DisposableDelegate} from '@lumino/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {DocumentRegistry} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import {ISettingRegistry} from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
   Location,
   LocationSet,
   parse,
-  slice,
+  slice
 } from '@andrewhead/python-program-analysis';
 
 import {
