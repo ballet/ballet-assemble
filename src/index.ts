@@ -236,48 +236,24 @@ export class AssembleSubmitButtonExtension
         }
         let ctsJoined = content.join('\n');
         let ctsSplit = ctsJoined.split('\n');
-        let activeCell = notebook.activeCell;
-        let currContent = activeCell.model.value.text;
-        console.log('active cell');
-        console.log(notebook.activeCellIndex);
-        console.log(currContent);
-        console.log('all cells');
-        console.log(ctsJoined);
-        console.log(ctsSplit);
 
-        /*// confirm to proceed
-        const confirmDialog = await showDialog({
-          title: 'Slice this code?',
-          body: new PreviewCodeWidget(ctsJoined)
-        });
-        if (!confirmDialog.button.accept) {
-          return;
-        }*/
-        // from here on: andrew head´s code slicing;
         // use parse(array) to generate tree
         let tree = parse(ctsJoined);
-        // create location type: e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10} line 6 from char 0 to char 10 (include eol)
         let loc = this.getLocationFromCurrentCell(
           notebook.activeCell,
           ctsSplit
         );
-        console.log('location');
-        console.log(loc);
-        // -> eg. get first and last line of activeCell.model.value.text and get corresponding indices in content[]
-        // return set of locations, whose first_line elem mark the lines that should be included
+
         let slicedLoc = slice(tree, loc);
-        console.log('sliced:');
 
         let map = new Map();
         for (let i = 0; i < slicedLoc.items.length; i++) {
           const line = slicedLoc.items[i].first_line;
-          console.log(line);
-          console.log(ctsSplit[line - 1]);
+          // [line - 1] because location type starts at 1, not 0
           map.set(line, ctsSplit[line - 1]);
         }
 
         let arraySorted = [...map.entries()].sort();
-        console.log(arraySorted);
         let finalSlice = [];
         for (let i = 0; i < arraySorted.length; i++) {
           finalSlice.push(arraySorted[i][1]);
@@ -285,16 +261,14 @@ export class AssembleSubmitButtonExtension
         let result = finalSlice.join('\n');
 
         const finalDialog = await showDialog({
-          title: 'Here is you code slice. \n Click OK to submit it to your upstream GitHub Repository!:',
+          title:
+            'Here is you code slice. Click OK to submit it to your upstream GitHub Repository!',
           body: new PreviewCodeWidget(result)
         });
         if (!finalDialog.button.accept) {
           return;
         }
-        // submit code (submitbutton as part of the widget)
-        // post contents to server
-        // see createSubmitButton
-        // check if authenticated
+
         if (!(await isAuthenticated())) {
           void showErrorMessage(
             'Not authenticated',
@@ -302,13 +276,19 @@ export class AssembleSubmitButtonExtension
           );
           return;
         }
-        this.submitContentToServer(result);
+        await this.submitContentToServer(result);
       },
       tooltip: 'Slice code of current cell'
     });
     return button;
   }
 
+  /*
+   * description: Returns the location (e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
+   * line 6 from char 0 to char 10 (include eol)) of the currently active cell
+   * activeCell: currently active cell
+   * content: array containing all lines of code of the notebook
+   * returns: set of locations, whose first_line elem mark the lines that should be included */
   private getLocationFromCurrentCell(activeCell: any, content: String[]) {
     let firstLine = content.length;
     let lastLine = 0;
@@ -338,7 +318,6 @@ export class AssembleSubmitButtonExtension
     // Location starts linecount at 1, not 0. Thus +1 has to be added to linecounter
     firstLine = firstLine + 1;
     lastLine = lastLine + 1;
-    console.log(firstLine + ' ' + lastLine);
 
     let l = new Loc();
     l.first_line = firstLine;
