@@ -186,32 +186,36 @@ export class AssembleSubmitButtonExtension
           return;
         }
 
-        // post contents to server
-        console.log(contents);
-        const result: ISubmissionResponse = await submit(contents);
-
-        // try to add a message to cell outputs
-        if (result.result) {
-          void showDialog({
-            title: 'Feature submitted successfully',
-            body: new FeatureSubmittedOkayWidget(result.url),
-            buttons: [Dialog.okButton()]
-          });
-        } else {
-          const message =
-            result.message !== undefined && result.message !== null
-              ? `: ${result.message}.`
-              : '.';
-          void showErrorMessage(
-            'Error submitting feature',
-            `Oops - there was a problem submitting your feature${message}`
-          );
-          console.error(result);
-        }
+        await this.submitContentToServer(contents);
       },
       tooltip: 'Submit current cell to Ballet project'
     });
     return button;
+  }
+
+  private async submitContentToServer(contents: string) {
+    // post contents to server
+    console.log(contents);
+    const result: ISubmissionResponse = await submit(contents);
+
+    // try to add a message to cell outputs
+    if (result.result) {
+      void showDialog({
+        title: 'Feature submitted successfully',
+        body: new FeatureSubmittedOkayWidget(result.url),
+        buttons: [Dialog.okButton()]
+      });
+    } else {
+      const message =
+        result.message !== undefined && result.message !== null
+          ? `: ${result.message}.`
+          : '.';
+      void showErrorMessage(
+        'Error submitting feature',
+        `Oops - there was a problem submitting your feature${message}`
+      );
+      console.error(result);
+    }
   }
 
   private createSliceButton(panel: NotebookPanel) {
@@ -222,9 +226,6 @@ export class AssembleSubmitButtonExtension
         svgstr: balletIconSvg
       }),*/
       onClick: async () => {
-        // todo: check if authenticated OR make spinner/loading sign
-        alert('Slicing...!');
-
         // load current cell
         let notebook = panel.content;
         let cells = panel.content.model.cells;
@@ -244,14 +245,14 @@ export class AssembleSubmitButtonExtension
         console.log(ctsJoined);
         console.log(ctsSplit);
 
-        // confirm to proceed
+        /*// confirm to proceed
         const confirmDialog = await showDialog({
           title: 'Slice this code?',
           body: new PreviewCodeWidget(ctsJoined)
         });
         if (!confirmDialog.button.accept) {
           return;
-        }
+        }*/
         // from here on: andrew head´s code slicing;
         // use parse(array) to generate tree
         let tree = parse(ctsJoined);
@@ -277,10 +278,15 @@ export class AssembleSubmitButtonExtension
 
         let arraySorted = [...map.entries()].sort();
         console.log(arraySorted);
+        let finalSlice = [];
+        for (let i = 0; i < arraySorted.length; i++) {
+          finalSlice.push(arraySorted[i][1]);
+        }
+        let result = finalSlice.join('\n');
 
         const finalDialog = await showDialog({
-          title: 'Here is you code slice:',
-          body: new PreviewCodeWidget(arraySorted.join('\n'))
+          title: 'Here is you code slice. \n Click OK to submit it to your upstream GitHub Repository!:',
+          body: new PreviewCodeWidget(result)
         });
         if (!finalDialog.button.accept) {
           return;
@@ -288,6 +294,15 @@ export class AssembleSubmitButtonExtension
         // submit code (submitbutton as part of the widget)
         // post contents to server
         // see createSubmitButton
+        // check if authenticated
+        if (!(await isAuthenticated())) {
+          void showErrorMessage(
+            'Not authenticated',
+            "You're not authenticated with GitHub - click the GitHub icon in the toolbar to connect!"
+          );
+          return;
+        }
+        this.submitContentToServer(result);
       },
       tooltip: 'Slice code of current cell'
     });
@@ -342,7 +357,6 @@ async function activate(
   settingRegistry: ISettingRegistry
 ): Promise<void> {
   console.log(`JupyterLab extension ${EXTENSION_NAME} is activated!`);
-
   // add button to toolbar
   app.docRegistry.addWidgetExtension(
     'Notebook',
