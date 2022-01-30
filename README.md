@@ -201,8 +201,10 @@ The slice can then be submitted to an upstream repository.
 
 The code-slicing feature can be activated upon **selecting a certain cell** and clicking the **"SLICE" button** in the toolbar.
  
-**Limitation:**\
-If the cells were executed out of order (i.e. cell 1 is a dependency of cell 2, but cell 2 dragged above cell 1) the code cannot be collected. 
+**Limitations:**
+- If the cells were executed out of order (i.e. cell 1 is a dependency of cell 2, but cell 2 dragged above cell 1) the code cannot be collected. 
+
+- Unlike the gather tool, code cells that have been deleted are no candidates for slicing. For example, if a user creates these two cells but then deletes cell 1, its code content will not be considered for the slice.
 
 ## Credits
 
