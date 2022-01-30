@@ -6,20 +6,20 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { LabIcon } from '@jupyterlab/ui-components';
+import {LabIcon} from '@jupyterlab/ui-components';
 
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import {IDisposable, DisposableDelegate} from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {DocumentRegistry} from '@jupyterlab/docregistry';
 
-import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {ISettingRegistry} from '@jupyterlab/settingregistry';
 
 import {
   Location,
@@ -226,9 +226,21 @@ export class AssembleSubmitButtonExtension
         svgstr: balletIconSvg
       }),*/
       onClick: async () => {
-        // load current cell
         let notebook = panel.content;
         let cells = panel.content.model.cells;
+
+        // load current cell and check if it contains code
+        let activeCell = notebook.activeCell.model.value.text.toString();
+        if (
+          activeCell === null ||
+          activeCell.length === null ||
+          activeCell.trim() === ''
+        ) {
+          alert(
+            'Selected cell does not have any code content. Slice cannot be obtained.'
+          );
+          return;
+        }
 
         let content = new Array(cells.length);
         for (let i = 0; i < cells.length; i++) {
@@ -293,8 +305,6 @@ export class AssembleSubmitButtonExtension
     let firstLine = content.length;
     let lastLine = 0;
     let activeCode = activeCell.model.value.text.toString();
-    console.log('active code:');
-    console.log(activeCode);
 
     // extract indices of first and last line
     for (let i = 0; i < content.length; i++) {
@@ -350,7 +360,7 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({ command: submitCommand, category: 'Assemble' });
+  palette.addItem({command: submitCommand, category: 'Assemble'});
 
   // check status of /assemble endpoints
   try {
