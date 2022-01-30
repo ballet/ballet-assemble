@@ -192,6 +192,18 @@ bumpversion <part>
 make release
 ```
 
+###Feature: Code Slicing
+This feature allows to **backtrace all code dependencies** of a selected cell an **extract** them from a notebook.
+
+The user receives an executable subset of code lines (the "slice") which only contains code that is needed for the computation of the selected cell. Note that code will be collected even if it does not define a feature definition.  
+
+The slice can then be submitted to an upstream repository. 
+
+The code-slicing feature can be activated upon **selecting a certain cell** and clicking the **"SLICE" button** in the toolbar.
+ 
+**Limitation:**\
+If the cells were executed out of order (i.e. cell 1 is a dependency of cell 2, but cell 2 dragged above cell 1) the code cannot be collected. 
+
 ## Credits
 
 ### Contributors
