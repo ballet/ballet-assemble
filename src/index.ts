@@ -6,20 +6,20 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {LabIcon} from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
-import {IDisposable, DisposableDelegate} from '@lumino/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {DocumentRegistry} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import {ISettingRegistry} from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
   Location,
@@ -28,11 +28,7 @@ import {
   slice
 } from '@andrewhead/python-program-analysis';
 
-import {
-  ConfirmWidget,
-  FeatureSubmittedOkayWidget,
-  PreviewCodeWidget
-} from './widgets';
+import { ConfirmWidget, FeatureSubmittedOkayWidget } from './widgets';
 
 import {
   ISubmissionResponse,
@@ -258,6 +254,10 @@ export class AssembleSubmitButtonExtension
 
         let slicedLoc = slice(tree, loc);
 
+        /* Take the set of locations returned by slice() and extract the given locations from the original code stored in ctsSplit.
+         * Every location contains the "line" attribute, which indicates the code line that was extracted (count starts at 1).
+         * Since the ctsSplit array starts at 0, an index shift needs to be performed: line = 1 of a location corresponds to
+         * ctsSplit[0]. */
         let map = new Map();
         for (let i = 0; i < slicedLoc.items.length; i++) {
           const line = slicedLoc.items[i].first_line;
@@ -275,7 +275,7 @@ export class AssembleSubmitButtonExtension
         const finalDialog = await showDialog({
           title:
             'Here is you code slice. Click OK to submit it to your upstream GitHub Repository!',
-          body: new PreviewCodeWidget(result)
+          body: new ConfirmWidget(result)
         });
         if (!finalDialog.button.accept) {
           return;
@@ -360,7 +360,7 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({command: submitCommand, category: 'Assemble'});
+  palette.addItem({ command: submitCommand, category: 'Assemble' });
 
   // check status of /assemble endpoints
   try {
