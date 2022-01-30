@@ -6,20 +6,20 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { LabIcon } from '@jupyterlab/ui-components';
+import {LabIcon} from '@jupyterlab/ui-components';
 
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import {IDisposable, DisposableDelegate} from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {DocumentRegistry} from '@jupyterlab/docregistry';
 
-import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {ISettingRegistry} from '@jupyterlab/settingregistry';
 
 import {
   Location,
@@ -28,7 +28,7 @@ import {
   slice
 } from '@andrewhead/python-program-analysis';
 
-import { ConfirmWidget, FeatureSubmittedOkayWidget } from './widgets';
+import {ConfirmWidget, FeatureSubmittedOkayWidget} from './widgets';
 
 import {
   ISubmissionResponse,
@@ -224,13 +224,15 @@ export class AssembleSubmitButtonExtension
       onClick: async () => {
         let notebook = panel.content;
         let cells = panel.content.model.cells;
+        console.log(notebook.activeCell.model.type);
 
         // load current cell and check if it contains code
         let activeCell = notebook.activeCell.model.value.text.toString();
         if (
           activeCell === null ||
           activeCell.length === null ||
-          activeCell.trim() === ''
+          activeCell.trim() === '' ||
+          notebook.activeCell.model.type !== 'code'
         ) {
           alert(
             'Selected cell does not have any code content. Slice cannot be obtained.'
@@ -238,39 +240,22 @@ export class AssembleSubmitButtonExtension
           return;
         }
 
-        let content = new Array(cells.length);
+        let content = [];
         for (let i = 0; i < cells.length; i++) {
-          content[i] = cells.get(i).value.text;
+          if (cells.get(i).type === 'code') {
+            content.push(cells.get(i).value.text);
+          }
         }
         let ctsJoined = content.join('\n');
         let ctsSplit = ctsJoined.split('\n');
 
         // use parse(array) to generate tree
         let tree = parse(ctsJoined);
-        let loc = this.getLocationFromCurrentCell(
-          notebook.activeCell,
-          ctsSplit
-        );
+        let loc = this.getLocationFromCurrentCell(activeCell, ctsSplit);
 
         let slicedLoc = slice(tree, loc);
 
-        /* Take the set of locations returned by slice() and extract the given locations from the original code stored in ctsSplit.
-         * Every location contains the "line" attribute, which indicates the code line that was extracted (count starts at 1).
-         * Since the ctsSplit array starts at 0, an index shift needs to be performed: line = 1 of a location corresponds to
-         * ctsSplit[0]. */
-        let map = new Map();
-        for (let i = 0; i < slicedLoc.items.length; i++) {
-          const line = slicedLoc.items[i].first_line;
-          // [line - 1] because location type starts at 1, not 0
-          map.set(line, ctsSplit[line - 1]);
-        }
-
-        let arraySorted = [...map.entries()].sort();
-        let finalSlice = [];
-        for (let i = 0; i < arraySorted.length; i++) {
-          finalSlice.push(arraySorted[i][1]);
-        }
-        let result = finalSlice.join('\n');
+        let result = this.getCodeFromSlice(slicedLoc, ctsSplit);
 
         const finalDialog = await showDialog({
           title:
@@ -295,20 +280,43 @@ export class AssembleSubmitButtonExtension
     return button;
   }
 
+  /* description: Takes the set of locations returned by slice() and extract the given locations from the original code stored in ctsSplit.
+   * Every location contains the "line" attribute, which indicates the code line that was extracted (count starts at 1).
+   * Since the ctsSplit array starts at 0, an index shift needs to be performed: line = 1 of a location corresponds to
+   * ctsSplit[0].
+   * slicedLoc: a set of locations that indicates which entries of ctsSplit are code dependencies
+   * ctsSplit: an array that contains the code of the current notebook, each entry corresponds to one line of code
+   * returns: a string array of the code lines that were marked in slicedLoc */
+  public getCodeFromSlice(slicedLoc: LocationSet, ctsSplit: string[]) {
+    let map = new Map();
+    for (let i = 0; i < slicedLoc.items.length; i++) {
+      const line = slicedLoc.items[i].first_line;
+      // [line - 1] because location type starts at 1, not 0
+      map.set(line, ctsSplit[line - 1]);
+    }
+
+    let arraySorted = [...map.entries()].sort();
+    let finalSlice = [];
+    for (let i = 0; i < arraySorted.length; i++) {
+      finalSlice.push(arraySorted[i][1]);
+    }
+    let result = finalSlice.join('\n');
+    return result;
+  }
+
   /*
    * description: Returns the location (e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
    * line 6 from char 0 to char 10 (include eol)) of the currently active cell
    * activeCell: currently active cell
    * content: array containing all lines of code of the notebook
    * returns: set of locations, whose first_line elem mark the lines that should be included */
-  private getLocationFromCurrentCell(activeCell: any, content: String[]) {
+  public getLocationFromCurrentCell(activeCell: any, content: String[]) {
     let firstLine = content.length;
     let lastLine = 0;
-    let activeCode = activeCell.model.value.text.toString();
 
     // extract indices of first and last line
     for (let i = 0; i < content.length; i++) {
-      if (activeCode.includes(content[i]) && content[i].length > 0) {
+      if (activeCell.includes(content[i]) && content[i].length > 0) {
         if (i < firstLine) {
           firstLine = i;
         }
@@ -360,7 +368,7 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({ command: submitCommand, category: 'Assemble' });
+  palette.addItem({command: submitCommand, category: 'Assemble'});
 
   // check status of /assemble endpoints
   try {
