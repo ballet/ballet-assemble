@@ -224,7 +224,6 @@ export class AssembleSubmitButtonExtension
       onClick: async () => {
         let notebook = panel.content;
         let cells = panel.content.model.cells;
-        console.log(notebook.activeCell.model.type);
 
         // load current cell and check if it contains code
         let activeCell = notebook.activeCell.model.value.text.toString();
@@ -251,11 +250,21 @@ export class AssembleSubmitButtonExtension
 
         // use parse(array) to generate tree
         let tree = parse(ctsJoined);
-        let loc = this.getLocationFromCurrentCell(activeCell, ctsSplit);
+        let loc;
+        try {
+          loc = this.getLocationFromCurrentCell(activeCell, ctsSplit);
+        } catch (e) {
+          alert(e.message);
+        }
 
         let slicedLoc = slice(tree, loc);
 
-        let result = this.getCodeFromSlice(slicedLoc, ctsSplit);
+        let result;
+        try {
+          result = this.getCodeFromSlice(slicedLoc, ctsSplit);
+        } catch (e) {
+          alert(e.message);
+        }
 
         const finalDialog = await showDialog({
           title:
@@ -288,6 +297,14 @@ export class AssembleSubmitButtonExtension
    * ctsSplit: an array that contains the code of the current notebook, each entry corresponds to one line of code
    * returns: a string array of the code lines that were marked in slicedLoc */
   public getCodeFromSlice(slicedLoc: LocationSet, ctsSplit: string[]) {
+    if (ctsSplit === null || ctsSplit.length === 0) {
+      throw new Error('No code found.');
+    }
+
+    if (slicedLoc === null || slicedLoc.size === 0) {
+      throw new Error('Slice not found.');
+    }
+
     let map = new Map();
     for (let i = 0; i < slicedLoc.items.length; i++) {
       const line = slicedLoc.items[i].first_line;
@@ -311,6 +328,13 @@ export class AssembleSubmitButtonExtension
    * content: array containing all lines of code of the notebook
    * returns: set of locations, whose first_line elem mark the lines that should be included */
   public getLocationFromCurrentCell(activeCell: any, content: String[]) {
+    if (activeCell === null || activeCell.trim() === '') {
+      throw new Error('Active cell is null or empty.');
+    }
+    if (content === null || content.length === 0) {
+      throw new Error('No code found');
+    }
+
     let firstLine = content.length;
     let lastLine = 0;
 
