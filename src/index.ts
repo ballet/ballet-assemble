@@ -6,20 +6,20 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {LabIcon} from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
-import {IDisposable, DisposableDelegate} from '@lumino/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {DocumentRegistry} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {NotebookPanel, INotebookModel} from '@jupyterlab/notebook';
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import {ISettingRegistry} from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
   Location,
@@ -28,7 +28,7 @@ import {
   slice
 } from '@andrewhead/python-program-analysis';
 
-import {ConfirmWidget, FeatureSubmittedOkayWidget} from './widgets';
+import { ConfirmWidget, FeatureSubmittedOkayWidget } from './widgets';
 
 import {
   ISubmissionResponse,
@@ -54,6 +54,88 @@ class Loc implements Location {
   last_line: number;
   // tslint:disable-next-line:variable-name
   last_column: number;
+}
+
+/*
+ * description: Returns the location (e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
+ * line 6 from char 0 to char 10 (include eol)) of the currently active cell
+ * activeCell: currently active cell
+ * content: array containing all lines of code of the notebook
+ * returns: set of locations, whose first_line elem mark the lines that should be included */
+export function getLocationFromCurrentCell(activeCell: any, content: String[]) {
+  if (activeCell === null || activeCell.trim() === '') {
+    throw new Error('Active cell is null or empty.');
+  }
+  if (content === null || content.length === 0) {
+    throw new Error('No code found');
+  }
+
+  let firstLine = content.length;
+  let lastLine = 0;
+
+  // extract indices of first and last line
+  for (let i = 0; i < content.length; i++) {
+    if (activeCell.includes(content[i]) && content[i].length > 0) {
+      if (i < firstLine) {
+        firstLine = i;
+      }
+      if (i > lastLine) {
+        lastLine = i;
+      }
+    }
+  }
+
+  let lastColumn = 0;
+  if (content[firstLine].length > content[lastLine].length) {
+    lastColumn = content[firstLine].length;
+  } else {
+    lastColumn = content[lastLine].length;
+  }
+
+  // Location starts linecount at 1, not 0. Thus +1 has to be added to linecounter
+  firstLine = firstLine + 1;
+  lastLine = lastLine + 1;
+
+  let l = new Loc();
+  l.first_line = firstLine;
+  l.first_column = 0;
+  l.last_line = lastLine;
+  l.last_column = lastColumn;
+
+  let ls = new LocationSet(l);
+  return ls;
+}
+
+/* description: Takes the set of locations returned by slice() and extract the given locations from the original code stored in ctsSplit.
+ * Every location contains the "line" attribute, which indicates the code line that was extracted (count starts at 1).
+ * Since the ctsSplit array starts at 0, an index shift needs to be performed: line = 1 of a location corresponds to
+ * ctsSplit[0].
+ * slicedLoc: a set of locations that indicates which entries of ctsSplit are code dependencies
+ * ctsSplit: an array that contains the code of the current notebook, each entry corresponds to one line of code
+ * returns: a string array of the code lines that were marked in slicedLoc */
+export function getCodeFromSlice(slicedLoc: LocationSet, ctsSplit: string[]) {
+  if (ctsSplit === null || ctsSplit.length === 0) {
+    throw new Error('No code found.');
+  }
+
+  if (slicedLoc === null || slicedLoc.size === 0) {
+    throw new Error('Slice not found.');
+  }
+
+  let map = new Map();
+  for (let i = 0; i < slicedLoc.items.length; i++) {
+    const line = slicedLoc.items[i].first_line;
+    // [line - 1] because location type starts at 1, not 0
+    map.set(line, ctsSplit[line - 1]);
+  }
+
+  let arraySorted = [...map.entries()].sort();
+  let finalSlice = [];
+  for (let i = 0; i < arraySorted.length; i++) {
+    finalSlice.push(arraySorted[i][1]);
+  }
+  let result = finalSlice.join('\n');
+  return result;
 }
 
 /**
@@ -252,7 +334,7 @@ export class AssembleSubmitButtonExtension
         let tree = parse(ctsJoined);
         let loc;
         try {
-          loc = this.getLocationFromCurrentCell(activeCell, ctsSplit);
+          loc = getLocationFromCurrentCell(activeCell, ctsSplit);
         } catch (e) {
           alert(e.message);
         }
@@ -261,7 +343,7 @@ export class AssembleSubmitButtonExtension
 
         let result;
         try {
-          result = this.getCodeFromSlice(slicedLoc, ctsSplit);
+          result = getCodeFromSlice(slicedLoc, ctsSplit);
         } catch (e) {
           alert(e.message);
         }
@@ -296,30 +378,9 @@ export class AssembleSubmitButtonExtension
    * slicedLoc: a set of locations that indicates which entries of ctsSplit are code dependencies
    * ctsSplit: an array that contains the code of the current notebook, each entry corresponds to one line of code
    * returns: a string array of the code lines that were marked in slicedLoc */
-  public getCodeFromSlice(slicedLoc: LocationSet, ctsSplit: string[]) {
-    if (ctsSplit === null || ctsSplit.length === 0) {
-      throw new Error('No code found.');
-    }
-
-    if (slicedLoc === null || slicedLoc.size === 0) {
-      throw new Error('Slice not found.');
-    }
-
-    let map = new Map();
-    for (let i = 0; i < slicedLoc.items.length; i++) {
-      const line = slicedLoc.items[i].first_line;
-      // [line - 1] because location type starts at 1, not 0
-      map.set(line, ctsSplit[line - 1]);
-    }
-
-    let arraySorted = [...map.entries()].sort();
-    let finalSlice = [];
-    for (let i = 0; i < arraySorted.length; i++) {
-      finalSlice.push(arraySorted[i][1]);
-    }
-    let result = finalSlice.join('\n');
-    return result;
-  }
+  /*public getCodeFromSlice(slicedLoc: LocationSet, ctsSplit: string[]) {
+    return func(ctsSplit, slicedLoc);
+  }*/
 
   /*
    * description: Returns the location (e.g. {first_line: 6, first_column: 0, last_line: 6, last_column: 10}
@@ -327,49 +388,9 @@ export class AssembleSubmitButtonExtension
    * activeCell: currently active cell
    * content: array containing all lines of code of the notebook
    * returns: set of locations, whose first_line elem mark the lines that should be included */
-  public getLocationFromCurrentCell(activeCell: any, content: String[]) {
-    if (activeCell === null || activeCell.trim() === '') {
-      throw new Error('Active cell is null or empty.');
-    }
-    if (content === null || content.length === 0) {
-      throw new Error('No code found');
-    }
-
-    let firstLine = content.length;
-    let lastLine = 0;
-
-    // extract indices of first and last line
-    for (let i = 0; i < content.length; i++) {
-      if (activeCell.includes(content[i]) && content[i].length > 0) {
-        if (i < firstLine) {
-          firstLine = i;
-        }
-        if (i > lastLine) {
-          lastLine = i;
-        }
-      }
-    }
-
-    let lastColumn = 0;
-    if (content[firstLine].length > content[lastLine].length) {
-      lastColumn = content[firstLine].length;
-    } else {
-      lastColumn = content[lastLine].length;
-    }
-
-    // Location starts linecount at 1, not 0. Thus +1 has to be added to linecounter
-    firstLine = firstLine + 1;
-    lastLine = lastLine + 1;
-
-    let l = new Loc();
-    l.first_line = firstLine;
-    l.first_column = 0;
-    l.last_line = lastLine;
-    l.last_column = lastColumn;
-
-    let ls = new LocationSet(l);
-    return ls;
-  }
+  /*  public getLocationFromCurrentCell(activeCell: any, content: String[]) {
+    return func(activeCell, content);
+  }*/
 }
 
 async function activate(
@@ -392,7 +413,7 @@ async function activate(
       console.log('Submit feature executed (TODO)');
     }
   });
-  palette.addItem({command: submitCommand, category: 'Assemble'});
+  palette.addItem({ command: submitCommand, category: 'Assemble' });
 
   // check status of /assemble endpoints
   try {
