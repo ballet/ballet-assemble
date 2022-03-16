@@ -51,9 +51,14 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
+    "@babel/core": "^7",
+    "@babel/preset-env": "^7",
+    "@types/jest": "^24",
     "@types/react": "~16.9.0",
+    "jest": "^24",
     "prettier": "^1.19.1",
     "rimraf": "^2.6.1",
+    "ts-jest": "^24",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
