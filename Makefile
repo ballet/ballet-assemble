@@ -105,14 +105,15 @@ install: clean-build clean-py ## install the package to the active Python's site
 
 .PHONY: install-test
 install-test: clean-build clean-py ## install the package and test dependencies
-	pip  install .[test]
+	pip install .[test]
+	jlpm install
 	jupyter lab build
 
 .PHONY: install-develop
 install-develop: clean-build clean-py ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
 	jupyter serverextension enable --py ballet_assemble
-	jlpm
+	jlpm install
 	jlpm build
 	jupyter labextension link
 	jlpm build

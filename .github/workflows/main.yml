@@ -63,7 +63,7 @@ jobs:
       run: |
         /usr/bin/env make test-js-lib
 
-  lint-python-lib:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
