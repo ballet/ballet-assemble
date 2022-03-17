@@ -69,7 +69,7 @@ test-python-lib: ## run python tests
 
 .PHONY: test-js-lib
 test-js-lib: ## run js tests
-	true  # TODO
+	jlpm run test
 
 .PHONY: lint
 lint: lint-python lint-js  ## lint
