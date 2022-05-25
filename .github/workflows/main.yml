@@ -56,11 +56,14 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '10.x'
+    - name: Install
+      run: |
+        /usr/bin/env make install-test
     - name: Test js library
       run: |
         /usr/bin/env make test-js-lib
 
-  lint-python-lib:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
